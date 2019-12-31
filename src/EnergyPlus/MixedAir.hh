@@ -58,7 +58,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
-
+    class OutputFiles;
 namespace MixedAir {
 
     // Using/Aliasing
@@ -301,10 +301,10 @@ namespace MixedAir {
         {
         }
 
-        void CalcOAController(int const AirLoopNum, bool const FirstHVACIteration);
+        void CalcOAController(OutputFiles &outputFiles, int const AirLoopNum, bool const FirstHVACIteration);
 
         void CalcOAEconomizer(
-            int const AirLoopNum, Real64 const OutAirMinFrac, Real64 &OASignal, bool &HighHumidityOperationFlag, bool const FirstHVACIteration);
+            OutputFiles &outputFiles, int const AirLoopNum, Real64 const OutAirMinFrac, Real64 &OASignal, bool &HighHumidityOperationFlag, bool const FirstHVACIteration);
 
         void SizeOAController();
 
@@ -430,13 +430,14 @@ namespace MixedAir {
     // Needed for unit tests, should not be normally called.
     void clear_state();
 
-    void ManageOutsideAirSystem(std::string const &OASysName, bool const FirstHVACIteration, int const AirLoopNum, int &OASysNum);
+    void ManageOutsideAirSystem(OutputFiles &outputFiles, std::string const &OASysName, bool const FirstHVACIteration, int const AirLoopNum, int &OASysNum);
 
-    void SimOutsideAirSys(int const OASysNum, bool const FirstHVACIteration, int const AirLoopNum);
+    void SimOutsideAirSys(OutputFiles &outputFiles, int const OASysNum, bool const FirstHVACIteration, int const AirLoopNum);
 
-    void SimOASysComponents(int const OASysNum, bool const FirstHVACIteration, int const AirLoopNum);
+    void SimOASysComponents(OutputFiles &outputFiles, int const OASysNum, bool const FirstHVACIteration, int const AirLoopNum);
 
-    void SimOAComponent(std::string const &CompType, // the component type
+    void SimOAComponent(OutputFiles &outputFiles,
+                        std::string const &CompType, // the component type
                         std::string const &CompName, // the component Name
                         int const CompTypeNum,       // Component Type -- Integerized for this module
                         bool const FirstHVACIteration,
@@ -451,12 +452,12 @@ namespace MixedAir {
 
     void SimOAMixer(std::string const &CompName, bool const FirstHVACIteration, int &CompIndex);
 
-    void SimOAController(std::string const &CtrlName, int &CtrlIndex, bool const FirstHVACIteration, int const AirLoopNum);
+    void SimOAController(OutputFiles &outputFiles, std::string const &CtrlName, int &CtrlIndex, bool const FirstHVACIteration, int const AirLoopNum);
 
     // Get Input Section of the Module
     //******************************************************************************
 
-    void GetOutsideAirSysInputs();
+    void GetOutsideAirSysInputs(OutputFiles &outputFiles);
 
     void GetOAControllerInputs();
 
@@ -523,8 +524,9 @@ namespace MixedAir {
                                        Array1<Real64> const &Par // par(1) = mixed node number
     );
 
-    Real64 MultiCompControlTempResidual(Real64 const OASignal,    // Relative outside air flow rate (0 to 1)
-                                        Array1<Real64> const &Par // par(1) = mixed node number
+    Real64 MultiCompControlTempResidual(OutputFiles &outputFiles,
+                                        Real64 const oasignal,    // relative outside air flow rate (0 to 1)
+                                        Array1<Real64> const &par // par(1) = mixed node number
     );
 
     Array1D_int GetOAMixerNodeNumbers(std::string const &OAMixerName, // must match OA mixer names for the OA mixer type
@@ -541,11 +543,11 @@ namespace MixedAir {
 
     int GetOASysNumSimpControllers(int const OASysNumber); // OA Sys Number
 
-    int GetOASysNumHeatingCoils(int const OASysNumber); // OA Sys Number
+    int GetOASysNumHeatingCoils(OutputFiles &outputFiles, int const OASysNumber); // OA Sys Number
 
     int GetOASysNumHXs(int const OASysNumber); // OA Sys Number
 
-    int GetOASysNumCoolingCoils(int const OASysNumber); // OA Sys Number
+    int GetOASysNumCoolingCoils(OutputFiles &outputFiles, int const OASysNumber); // OA Sys Number
 
     int GetOASystemNumber(std::string const &OASysName); // OA Sys Name
 

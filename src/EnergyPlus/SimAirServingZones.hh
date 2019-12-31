@@ -119,7 +119,8 @@ namespace SimAirServingZones {
     // Functions
     void clear_state();
 
-    void ManageAirLoops(bool const FirstHVACIteration, // TRUE if first full HVAC iteration in an HVAC timestep
+    void ManageAirLoops(OutputFiles &outputFiles,
+                        bool const FirstHVACIteration, // TRUE if first full HVAC iteration in an HVAC timestep
                         bool &SimAir,                  // TRUE means air loops must be (re)simulated
                         bool &SimZoneEquipment         // TRUE means zone equipment must be (re) simulated
     );
@@ -127,7 +128,7 @@ namespace SimAirServingZones {
     // Get Input Section of the Module
     //******************************************************************************
 
-    void GetAirPathData();
+    void GetAirPathData(OutputFiles &outputFiles);
 
     // End of Get Input subroutines for the Module
     //******************************************************************************
@@ -135,20 +136,20 @@ namespace SimAirServingZones {
     // Beginning Initialization Section of the Module
     //******************************************************************************
 
-    void InitAirLoops(bool const FirstHVACIteration); // TRUE if first full HVAC iteration in an HVAC timestep
+    void InitAirLoops(OutputFiles &outputFiles, bool const FirstHVACIteration); // TRUE if first full HVAC iteration in an HVAC timestep
 
     void ConnectReturnNodes();
 
     // Begin Algorithm Section of the Module
     //******************************************************************************
 
-    void SimAirLoops(bool const FirstHVACIteration, bool &SimZoneEquipment);
+    void SimAirLoops(OutputFiles &outputFiles, bool const FirstHVACIteration, bool &SimZoneEquipment);
 
     void SimAirLoop(
-        bool const FirstHVACIteration, int const AirLoopNum, int const AirLoopPass, int &AirLoopIterMax, int &AirLoopIterTot, int &AirLoopNumCalls);
+        OutputFiles &outputFiles, bool const FirstHVACIteration, int const AirLoopNum, int const AirLoopPass, int &AirLoopIterMax, int &AirLoopIterTot, int &AirLoopNumCalls);
 
     void SolveAirLoopControllers(
-        bool const FirstHVACIteration, int const AirLoopNum, bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls);
+        OutputFiles &outputFiles, bool const FirstHVACIteration, int const AirLoopNum, bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls);
 
     void SolveWaterCoilController(bool const FirstHVACIteration,
                                   int const AirLoopNum,
@@ -159,13 +160,15 @@ namespace SimAirServingZones {
                                   bool const HXAssistedWaterCoil);
 
     void ReSolveAirLoopControllers(
-        bool const FirstHVACIteration, int const AirLoopNum, bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls);
+        OutputFiles &outputFiles, bool const FirstHVACIteration, int const AirLoopNum, bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls);
 
-    void SimAirLoopComponents(int const AirLoopNum,         // Index of the air loop being currently simulated
+    void SimAirLoopComponents(OutputFiles &outputFiles,
+                              int const AirLoopNum,         // Index of the air loop being currently simulated
                               bool const FirstHVACIteration // TRUE if first full HVAC iteration in an HVAC timestep
     );
 
-    void SimAirLoopComponent(std::string const &CompName,   // the component Name
+    void SimAirLoopComponent(OutputFiles &outputFiles,
+                             std::string const &CompName,   // the component Name
                              int const CompType_Num,        // numeric equivalent for component type
                              bool const FirstHVACIteration, // TRUE if first full HVAC iteration in an HVAC timestep
                              int const AirLoopNum,          // Primary air loop number

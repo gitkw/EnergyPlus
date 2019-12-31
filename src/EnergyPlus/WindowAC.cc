@@ -1463,13 +1463,14 @@ namespace WindowAC {
         }
 
         if (WindAC(WindACNum).DXCoilType_Num == CoilDX_CoolingHXAssisted) {
-            SimHXAssistedCoolingCoil(WindAC(WindACNum).DXCoilName,
+            SimHXAssistedCoolingCoil(outputFiles, WindAC(WindACNum).DXCoilName,
                                      FirstHVACIteration,
                                      On,
                                      PartLoadFrac,
                                      WindAC(WindACNum).DXCoilIndex,
                                      WindAC(WindACNum).OpMode,
-                                     HXUnitOn);
+                                     HXUnitOn, Optional<const Real64>(), ObjexxFCL::Optional_bool_const(),
+                                     Optional<Real64>());
         } else if (WindAC(WindACNum).DXCoilType_Num == DataHVACGlobals::Coil_CoolingAirToAirVariableSpeed) {
             Real64 QZnReq(-1.0);               // Zone load (W), input to variable-speed DX coil
             Real64 QLatReq(0.0);               // Zone latent load, input to variable-speed DX coil
@@ -1493,7 +1494,9 @@ namespace WindowAC {
                                                       OnOffAirFlowRatio);
 
         } else {
-            SimDXCoil(WindAC(WindACNum).DXCoilName, On, FirstHVACIteration, WindAC(WindACNum).DXCoilIndex, WindAC(WindACNum).OpMode, PartLoadFrac);
+            SimDXCoil(outputFiles, WindAC(WindACNum).DXCoilName, On, FirstHVACIteration,
+                      WindAC(WindACNum).DXCoilIndex, WindAC(WindACNum).OpMode, PartLoadFrac, Optional<const Real64>(),
+                      Optional<const Real64>(), Optional<const Real64>(), Optional<const Real64>());
         }
 
         if (WindAC(WindACNum).FanPlace == DrawThru) {

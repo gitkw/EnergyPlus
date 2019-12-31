@@ -294,7 +294,8 @@ namespace HVACMultiSpeedHeatPump {
 
     // Functions
 
-    void SimMSHeatPump(std::string const &CompName,   // Name of the unitary engine driven heat pump system
+    void SimMSHeatPump(OutputFiles &outputFiles,
+                       std::string const &CompName,   // Name of the unitary engine driven heat pump system
                        bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system time step
                        int const AirLoopNum,          // air loop index
                        int &CompIndex                 // Index to changeover-bypass VAV system
@@ -302,7 +303,8 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
-    void SimMSHP(int const MSHeatPumpNum,       // number of the current engine driven Heat Pump being simulated
+    void SimMSHP(OutputFiles &outputFiles,
+                 int const MSHeatPumpNum,       // number of the current engine driven Heat Pump being simulated
                  bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
                  int const AirLoopNum,          // air loop index
                  Real64 &QSensUnitOut,          // cooling/heating deliveded to zones [W]
@@ -316,7 +318,8 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
-    void InitMSHeatPump(int const MSHeatPumpNum,       // Engine driven heat pump number
+    void InitMSHeatPump(OutputFiles &outputFiles,
+                        int const MSHeatPumpNum,       // Engine driven heat pump number
                         bool const FirstHVACIteration, // TRUE if first HVAC iteration
                         int const AirLoopNum,          // air loop index
                         Real64 &QZnReq,                // Heating/Cooling load for all served zones
@@ -329,7 +332,8 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
-    void ControlMSHPOutput(int const MSHeatPumpNum,       // Unit index of engine driven heat pump
+    void ControlMSHPOutput(OutputFiles &outputFiles,
+                           int const MSHeatPumpNum,       // Unit index of engine driven heat pump
                            bool const FirstHVACIteration, // flag for 1st HVAC iteration in the time step
                            int const CompOp,              // compressor operation; 1=on, 0=off
                            int const OpMode,              // operating mode: CycFanCycCoil | ContFanCycCoil
@@ -344,7 +348,8 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
-    void CalcMSHeatPump(int const MSHeatPumpNum,       // Engine driven heat pump number
+    void CalcMSHeatPump(OutputFiles &outputFiles,
+                        int const MSHeatPumpNum,       // Engine driven heat pump number
                         bool const FirstHVACIteration, // Flag for 1st HVAC iteration
                         int const CompOp,              // Compressor on/off; 1=on, 0=off
                         int const SpeedNum,            // Speed number
@@ -358,13 +363,15 @@ namespace HVACMultiSpeedHeatPump {
 
     //******************************************************************************
 
-    Real64 MSHPCyclingResidual(Real64 const PartLoadFrac, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 MSHPCyclingResidual(OutputFiles &outputFiles,
+                               Real64 const PartLoadFrac, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                Array1<Real64> const &Par  // par(1) = MSHPNum
     );
 
     //******************************************************************************
 
-    Real64 MSHPVarSpeedResidual(Real64 const SpeedRatio,  // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 MSHPVarSpeedResidual(OutputFiles &outputFiles,
+                                Real64 const SpeedRatio,  // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                 Array1<Real64> const &Par // par(1) = MSHPNum
     );
 

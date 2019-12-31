@@ -1123,7 +1123,8 @@ TEST_F(EnergyPlusFixture, UnitHeater_HWHeatingCoilUAAutoSizingTest)
     BeginEnvrnFlag = true;
     ZoneSizingCalc = true;
     createFacilityElectricPowerServiceObject();
-    SizingManager::ManageSizing();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SizingManager::ManageSizing(outputFiles);
 
     EXPECT_FALSE(ErrorsFound);
     EXPECT_EQ(1, NumOfUnitHeats);
@@ -1287,7 +1288,7 @@ TEST_F(EnergyPlusFixture, UnitHeater_SimUnitHeaterTest)
     EXPECT_FALSE(ErrorsFound);
 
     ErrorsFound = false;
-    GetZoneEquipmentData();
+    GetZoneEquipmentData(outputFiles);
     EXPECT_FALSE(ErrorsFound);
 
     ErrorsFound = false;
@@ -2428,7 +2429,8 @@ TEST_F(EnergyPlusFixture, UnitHeater_SecondPriorityZoneEquipment)
     // OutputProcessor::TimeValue.allocate(2);
     DataGlobals::DDOnlySimulation = true;
 
-    ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    ManageSimulation(outputFiles);
 
     EXPECT_EQ(ZoneEquipList(1).NumOfEquipTypes, 2);
     // first priority zone equipment is zone ADU
@@ -2462,7 +2464,7 @@ TEST_F(EnergyPlusFixture, UnitHeater_SecondPriorityZoneEquipment)
     bool SimAirLoops = true;
     bool FirstHVACIteration = false;
     // re-simulate the zone HVAC equipment per the priority order
-    ZoneEquipmentManager::ManageZoneEquipment(FirstHVACIteration, SimZoneEquipment, SimAirLoops);
+    ZoneEquipmentManager::ManageZoneEquipment(outputFiles, FirstHVACIteration, SimZoneEquipment, SimAirLoops);
     // check the reheat coil nominal capacity
     EXPECT_NEAR(HeatingCoils::HeatingCoil(1).NominalCapacity, 17542.3, 1.0);
     // check the reheat coil outputis the full capacity

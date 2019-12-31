@@ -488,9 +488,9 @@ namespace DataZoneEquipment {
     // Needed for unit tests, should not be normally called.
     void clear_state();
 
-    void GetZoneEquipmentData();
+    void GetZoneEquipmentData(OutputFiles &outputFiles);
 
-    void GetZoneEquipmentData1();
+    void GetZoneEquipmentData1(OutputFiles &outputFiles);
 
     void SetupZoneEquipmentForConvectionFlowRegime();
 
@@ -498,18 +498,20 @@ namespace DataZoneEquipment {
                                 std::string const &ComponentName, // Name of component
                                 Optional_int CtrlZoneNum = _);
 
-    int GetControlledZoneIndex(std::string const &ZoneName); // Zone name to match into Controlled Zone structure
+    int GetControlledZoneIndex(OutputFiles &outputFiles, std::string const &ZoneName); // Zone name to match into Controlled Zone structure
 
-    int FindControlledZoneIndexFromSystemNodeNumberForZone(int const TrialZoneNodeNum); // Node number to match into Controlled Zone structure
+    int FindControlledZoneIndexFromSystemNodeNumberForZone(OutputFiles &outputFiles, int const TrialZoneNodeNum); // Node number to match into Controlled Zone structure
 
-    int GetSystemNodeNumberForZone(std::string const &ZoneName); // Zone name to match into Controlled Zone structure
+    int GetSystemNodeNumberForZone(OutputFiles &outputFiles, std::string const &ZoneName); // Zone name to match into Controlled Zone structure
 
-    int GetReturnAirNodeForZone(std::string const &ZoneName,             // Zone name to match into Controlled Zone structure
+    int GetReturnAirNodeForZone(OutputFiles &outputFiles,
+                                std::string const &ZoneName,             // Zone name to match into Controlled Zone structure
                                 std::string const &NodeName,             // Return air node name to match (may be blank)
                                 std::string const &calledFromDescription // String identifying the calling function and object
     );
 
-    int GetReturnNumForZone(std::string const &ZoneName, // Zone name to match into Controlled Zone structure
+    int GetReturnNumForZone(OutputFiles &outputFiles,
+                            std::string const &ZoneName, // Zone name to match into Controlled Zone structure
                             std::string const &NodeName  // Return air node name to match (may be blank)
     );
 

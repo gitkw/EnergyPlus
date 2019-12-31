@@ -5853,21 +5853,23 @@ namespace PackagedTerminalHeatPump {
                 auto const SELECT_CASE_var(PTUnit(PTUnitNum).UnitType_Num);
                 if ((SELECT_CASE_var == PTACUnit) || (SELECT_CASE_var == PTHPUnit)) {
                     if (PTUnit(PTUnitNum).DXCoolCoilType_Num == CoilDX_CoolingHXAssisted) {
-                        SimHXAssistedCoolingCoil(PTUnit(PTUnitNum).DXCoolCoilName,
+                        SimHXAssistedCoolingCoil(outputFiles, PTUnit(PTUnitNum).DXCoolCoilName,
                                                  FirstHVACIteration,
                                                  On,
                                                  PartLoadFrac,
                                                  PTUnit(PTUnitNum).CoolCoilCompIndex,
                                                  PTUnit(PTUnitNum).OpMode,
-                                                 HXUnitOn);
+                                                 HXUnitOn, Optional<const Real64>(), ObjexxFCL::Optional_bool_const(),
+                                                 Optional<Real64>());
                     } else {
-                        SimDXCoil(PTUnit(PTUnitNum).DXCoolCoilName,
+                        SimDXCoil(outputFiles, PTUnit(PTUnitNum).DXCoolCoilName,
                                   On,
                                   FirstHVACIteration,
                                   PTUnit(PTUnitNum).CoolCoilCompIndex,
                                   PTUnit(PTUnitNum).OpMode,
                                   PartLoadFrac,
-                                  OnOffAirFlowRatio);
+                                  OnOffAirFlowRatio, Optional<const Real64>(), Optional<const Real64>(),
+                                  Optional<const Real64>());
                     }
                     SaveCompressorPLR = DXCoilPartLoadRatio(PTUnit(PTUnitNum).DXCoolCoilIndexNum);
                 } else if (SELECT_CASE_var == PTWSHPUnit) {
@@ -5894,21 +5896,23 @@ namespace PackagedTerminalHeatPump {
                 auto const SELECT_CASE_var(PTUnit(PTUnitNum).UnitType_Num);
                 if ((SELECT_CASE_var == PTACUnit) || (SELECT_CASE_var == PTHPUnit)) {
                     if (PTUnit(PTUnitNum).DXCoolCoilType_Num == CoilDX_CoolingHXAssisted) {
-                        SimHXAssistedCoolingCoil(PTUnit(PTUnitNum).DXCoolCoilName,
+                        SimHXAssistedCoolingCoil(outputFiles, PTUnit(PTUnitNum).DXCoolCoilName,
                                                  FirstHVACIteration,
                                                  Off,
                                                  dZero,
                                                  PTUnit(PTUnitNum).CoolCoilCompIndex,
                                                  PTUnit(PTUnitNum).OpMode,
-                                                 HXUnitOn);
+                                                 HXUnitOn, Optional<const Real64>(), ObjexxFCL::Optional_bool_const(),
+                                                 Optional<Real64>());
                     } else {
-                        SimDXCoil(PTUnit(PTUnitNum).DXCoolCoilName,
+                        SimDXCoil(outputFiles, PTUnit(PTUnitNum).DXCoolCoilName,
                                   Off,
                                   FirstHVACIteration,
                                   PTUnit(PTUnitNum).CoolCoilCompIndex,
                                   PTUnit(PTUnitNum).OpMode,
                                   dZero,
-                                  OnOffAirFlowRatio);
+                                  OnOffAirFlowRatio, Optional<const Real64>(), Optional<const Real64>(),
+                                  Optional<const Real64>());
                     }
                 } else if (SELECT_CASE_var == PTWSHPUnit) {
                     SimWatertoAirHPSimple(BlankString,
@@ -5985,13 +5989,14 @@ namespace PackagedTerminalHeatPump {
                 {
                     auto const SELECT_CASE_var(PTUnit(PTUnitNum).UnitType_Num);
                     if (SELECT_CASE_var == PTHPUnit) {
-                        SimDXCoil(PTUnit(PTUnitNum).DXHeatCoilName,
+                        SimDXCoil(outputFiles, PTUnit(PTUnitNum).DXHeatCoilName,
                                   On,
                                   FirstHVACIteration,
                                   PTUnit(PTUnitNum).DXHeatCoilIndexNum,
                                   PTUnit(PTUnitNum).OpMode,
                                   PartLoadFrac,
-                                  OnOffAirFlowRatio);
+                                  OnOffAirFlowRatio, Optional<const Real64>(), Optional<const Real64>(),
+                                  Optional<const Real64>());
                         SaveCompressorPLR = DXCoilPartLoadRatio(PTUnit(PTUnitNum).DXHeatCoilIndexNum);
                     } else if (SELECT_CASE_var == PTWSHPUnit) {
                         HeatPumpRunFrac(PTUnitNum, PartLoadFrac, errFlag, WSHPRuntimeFrac);
@@ -6053,13 +6058,14 @@ namespace PackagedTerminalHeatPump {
                 {
                     auto const SELECT_CASE_var(PTUnit(PTUnitNum).UnitType_Num);
                     if (SELECT_CASE_var == PTHPUnit) {
-                        SimDXCoil(PTUnit(PTUnitNum).DXHeatCoilName,
+                        SimDXCoil(outputFiles, PTUnit(PTUnitNum).DXHeatCoilName,
                                   Off,
                                   FirstHVACIteration,
                                   PTUnit(PTUnitNum).DXHeatCoilIndexNum,
                                   PTUnit(PTUnitNum).OpMode,
                                   dZero,
-                                  OnOffAirFlowRatio);
+                                  OnOffAirFlowRatio, Optional<const Real64>(), Optional<const Real64>(),
+                                  Optional<const Real64>());
                     } else if (SELECT_CASE_var == PTWSHPUnit) {
                         SimWatertoAirHPSimple(BlankString,
                                               PTUnit(PTUnitNum).DXHeatCoilIndexNum,

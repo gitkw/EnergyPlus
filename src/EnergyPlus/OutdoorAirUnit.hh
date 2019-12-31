@@ -247,32 +247,36 @@ namespace OutdoorAirUnit {
 
     void clear_state();
 
-    void SimOutdoorAirUnit(std::string const &CompName,   // name of the outdoor air unit
+    void SimOutdoorAirUnit(OutputFiles &outputFiles,
+                           std::string const &CompName,   // name of the outdoor air unit
                            int const ZoneNum,             // number of zone being served
                            bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
                            Real64 &PowerMet,              // Sensible power supplied (W)
                            Real64 &LatOutputProvided,     // Latent add/removal supplied by window AC (kg/s), dehumid = negative
                            int &CompIndex);
 
-    void GetOutdoorAirUnitInputs();
+    void GetOutdoorAirUnitInputs(OutputFiles &outputFiles);
 
-    void InitOutdoorAirUnit(int const OAUnitNum,          // index for the current outdoor air unit
+    void InitOutdoorAirUnit(OutputFiles &outputFiles,
+                            int const OAUnitNum,          // index for the current outdoor air unit
                             int const ZoneNum,            // number of zone being served
                             bool const FirstHVACIteration // TRUE if 1st HVAC simulation of system timestep
     );
 
-    void SizeOutdoorAirUnit(int const OAUnitNum);
+    void SizeOutdoorAirUnit(OutputFiles &outputFiles, int const OAUnitNum);
 
-    void CalcOutdoorAirUnit(int &OAUnitNum,                // number of the current unit being simulated
+    void CalcOutdoorAirUnit(OutputFiles &outputFiles,
+                            int &OAUnitNum,                // number of the current unit being simulated
                             int const ZoneNum,             // number of zone being served
                             bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
                             Real64 &PowerMet,              // power supplied
                             Real64 &LatOutputProvided      // Latent power supplied (kg/s), negative = dehumidification
     );
 
-    void SimZoneOutAirUnitComps(int const OAUnitNum, bool const FirstHVACIteration);
+    void SimZoneOutAirUnitComps(OutputFiles &outputFiles, int const OAUnitNum, bool const FirstHVACIteration);
 
-    void SimOutdoorAirEquipComps(int const OAUnitNum,          // actual outdoor air unit num
+    void SimOutdoorAirEquipComps(OutputFiles &outputFiles,
+                                 int const OAUnitNum,          // actual outdoor air unit num
                                  std::string const &EquipType, // the component type
                                  std::string const &EquipName, // the component Name
                                  int const EquipNum,
@@ -282,7 +286,8 @@ namespace OutdoorAirUnit {
                                  bool const Sim // if TRUE, simulate component
     );
 
-    void CalcOAUnitCoilComps(int const CompNum, // actual outdoor air unit num
+    void CalcOAUnitCoilComps(OutputFiles &outputFiles,
+                             int const CompNum, // actual outdoor air unit num
                              bool const FirstHVACIteration,
                              int const EquipIndex, // Component Type -- Integerized for this module
                              Real64 &LoadMet);
@@ -296,11 +301,11 @@ namespace OutdoorAirUnit {
 
     void ReportOutdoorAirUnit(int const OAUnitNum); // Index for the outdoor air unit under consideration within the derived types
 
-    int GetOutdoorAirUnitOutAirNode(int const OAUnitNum);
+    int GetOutdoorAirUnitOutAirNode(OutputFiles &outputFiles, int const OAUnitNum);
 
-    int GetOutdoorAirUnitZoneInletNode(int const OAUnitNum);
+    int GetOutdoorAirUnitZoneInletNode(OutputFiles &outputFiles, int const OAUnitNum);
 
-    int GetOutdoorAirUnitReturnAirNode(int const OAUnitNum);
+    int GetOutdoorAirUnitReturnAirNode(OutputFiles &outputFiles, int const OAUnitNum);
 
     //*****************************************************************************************
 

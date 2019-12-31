@@ -449,9 +449,10 @@ TEST_F(EnergyPlusFixture, WindowAC_VStest1)
     DataGlobals::ZoneSizingCalc = true;
     EnergyPlus::createFacilityElectricPowerServiceObject();
 
-    SizingManager::ManageSizing();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SizingManager::ManageSizing(outputFiles);
 
-    SimulationManager::SetupSimulation(errorsFound);
+    SimulationManager::SetupSimulation(outputFiles, errorsFound);
     //
 
     Real64 qDotMet(0.0);    // Watts total cap

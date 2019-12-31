@@ -57,6 +57,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 // note that there are two modules in this file
 
@@ -218,7 +219,8 @@ namespace HVACDXSystem {
 
     void clear_state();
 
-    void SimDXCoolingSystem(std::string const &DXCoolingSystemName,    // Name of DXSystem:Airloop object
+    void SimDXCoolingSystem(OutputFiles &outputFiles,
+                            std::string const &DXCoolingSystemName,    // Name of DXSystem:Airloop object
                             bool const FirstHVACIteration,             // True when first HVAC iteration
                             int const AirLoopNum,                      // Primary air loop number
                             int &CompIndex,                            // Index to DXSystem:Airloop object
@@ -230,7 +232,7 @@ namespace HVACDXSystem {
     // Get Input Section of the Module
     //******************************************************************************
 
-    void GetDXCoolingSystemInput();
+    void GetDXCoolingSystemInput(OutputFiles &outputFiles);
 
     // End of Get Input subroutines for the Module
     //******************************************************************************
@@ -250,7 +252,8 @@ namespace HVACDXSystem {
     // Beginning of Calculation subroutines for the DXCoolingSystem Module
     // *****************************************************************************
 
-    void ControlDXSystem(int const DXSystemNum,         // index to DXSystem
+    void ControlDXSystem(OutputFiles &outputFiles,
+                         int const DXSystemNum,         // index to DXSystem
                          bool const FirstHVACIteration, // First HVAC iteration flag
                          bool &HXUnitOn                 // flag to enable heat exchanger heat recovery
     );
@@ -279,19 +282,23 @@ namespace HVACDXSystem {
                                     Array1<Real64> const &Par   // par(1) = DX coil number
     );
 
-    Real64 MultiModeDXCoilResidual(Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 MultiModeDXCoilResidual(OutputFiles &outputFiles,
+                                   Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                    Array1<Real64> const &Par   // par(1) = DX coil number
     );
 
-    Real64 MultiModeDXCoilHumRatResidual(Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 MultiModeDXCoilHumRatResidual(OutputFiles &outputFiles,
+                                         Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                          Array1<Real64> const &Par   // par(1) = DX coil number
     );
 
-    Real64 HXAssistedCoolCoilTempResidual(Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 HXAssistedCoolCoilTempResidual(OutputFiles &outputFiles,
+                                          Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                           Array1<Real64> const &Par   // par(1) = DX coil number
     );
 
-    Real64 HXAssistedCoolCoilHRResidual(Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 HXAssistedCoolCoilHRResidual(OutputFiles &outputFiles,
+                                        Real64 const PartLoadRatio, // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                         Array1<Real64> const &Par   // par(1) = DX coil number
     );
 
@@ -311,10 +318,10 @@ namespace HVACDXSystem {
                                    int const ControlMode       // temperature or humidity control mode
     );
 
-    void CheckDXCoolingCoilInOASysExists(std::string const &DXCoilSysName);
+    void CheckDXCoolingCoilInOASysExists(OutputFiles &outputFiles, std::string const &DXCoilSysName);
 
-    void GetCoolingCoilTypeNameAndIndex(
-        std::string const &DXCoilSysName, int &CoolCoilType, int &CoolCoilIndex, std::string &CoolCoilName, bool &ErrFound);
+    void GetCoolingCoilTypeNameAndIndex(OutputFiles &outputFiles, std::string const &DXCoilSysName, int &CoolCoilType,
+                                        int &CoolCoilIndex, std::string &CoolCoilName, bool &ErrFound);
 
     //******************************************************************************
 
@@ -338,9 +345,9 @@ namespace HVACDXSystem {
                                   Array1<Real64> const &Par // par(1) = DX coil number
     );
 
-    int GetCoolingCoilInletNodeNum(std::string const &DXCoilSysName);
+    int GetCoolingCoilInletNodeNum(OutputFiles &outputFiles, std::string const &DXCoilSysName);
 
-    int GetCoolingCoilOutletNodeNum(std::string const &DXCoilSysName);
+    int GetCoolingCoilOutletNodeNum(OutputFiles &outputFiles, std::string const &DXCoilSysName);
 
     //        End of Calculation subroutines for the DXCoolingSystem Module
     // *****************************************************************************

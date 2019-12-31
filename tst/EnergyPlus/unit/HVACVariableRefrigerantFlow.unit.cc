@@ -3198,7 +3198,7 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve)
     GlobalNames::NumCoils = 0;         // remove this when clear_state gets added to GlobalNames
     GlobalNames::CoilNames.clear();    // remove this when clear_state gets added to GlobalNames
 
-    GetZoneEquipmentData();                                // read equipment list and connections
+    GetZoneEquipmentData(outputFiles);                                // read equipment list and connections
     ZoneInletAirNode = GetVRFTUZoneInletAirNode(VRFTUNum); // trigger GetVRFInput by calling a mining function
 
     Schedule(VRF(VRFCond).SchedPtr).CurrentValue = 1.0;             // enable the VRF condenser
@@ -4094,7 +4094,7 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve_GetInputFailers)
     GetZoneData(ErrorsFound); // read zone data
     EXPECT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData(); // read equipment list and connections
+    GetZoneEquipmentData(outputFiles); // read equipment list and connections
     GetVRFInputData(ErrorsFound);
     EXPECT_TRUE(ErrorsFound);
     EXPECT_EQ(0, VRFTU(VRFTUNum).VRFSysNum);
@@ -4954,7 +4954,7 @@ TEST_F(EnergyPlusFixture, VRFTest_SysCurve_WaterCooled)
     HeatBalanceManager::GetZoneData(ErrorsFound); // read zone data
     EXPECT_FALSE(ErrorsFound);
 
-    DataZoneEquipment::GetZoneEquipmentData(); // read equipment list and connections
+    DataZoneEquipment::GetZoneEquipmentData(outputFiles); // read equipment list and connections
 
     BranchInputManager::ManageBranchInput();
     // Get plant loop data
@@ -5768,7 +5768,7 @@ TEST_F(EnergyPlusFixture, VRFTest_TU_NoLoad_OAMassFlowRateTest)
     HeatBalanceManager::GetZoneData(ErrorsFound); // read zone data
     EXPECT_FALSE(ErrorsFound);
 
-    DataZoneEquipment::GetZoneEquipmentData(); // read equipment list and connections
+    DataZoneEquipment::GetZoneEquipmentData(outputFiles); // read equipment list and connections
     HVACVariableRefrigerantFlow::MyEnvrnFlag = true;
     ZoneInletAirNode = GetVRFTUZoneInletAirNode(VRFTUNum);  // trigger GetVRFInput by calling a mining function
     OutsideAirNode = VRFTU(VRFTUNum).VRFTUOAMixerOANodeNum; // outside air air inlet node num
@@ -7186,7 +7186,7 @@ TEST_F(EnergyPlusFixture, VRFTU_SupplementalHeatingCoilGetInput)
     ASSERT_FALSE(ErrorsFound);
 
     // read equip list and connections
-    GetZoneEquipmentData();
+    GetZoneEquipmentData(outputFiles);
     // get VRF terminal unit
     GetVRFInput();
 
@@ -9871,7 +9871,8 @@ TEST_F(EnergyPlusFixture, VRFFluidControl_FanSysModel_OnOffModeTest)
         });
     ASSERT_TRUE(process_idf(idf_objects));
 
-    SimulationManager::ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles);
 
     int VRFCond(1);
     int ZoneNum(1);
@@ -10486,7 +10487,7 @@ TEST_F(EnergyPlusFixture, VRFTU_SysCurve_ReportOutputVerificationTest)
     GetZoneData(ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
     // get zone input and connections
-    GetZoneEquipmentData();
+    GetZoneEquipmentData(outputFiles);
     ZoneInletAirNode = GetVRFTUZoneInletAirNode(VRFTUNum);
     Schedule(VRF(VRFCond).SchedPtr).CurrentValue = 1.0;
     Schedule(VRFTU(VRFTUNum).SchedPtr).CurrentValue = 1.0;
@@ -12194,7 +12195,7 @@ TEST_F(EnergyPlusFixture, VRF_FluidTCtrl_ReportOutputVerificationTest)
     GetZoneData(ErrorsFound);
     EXPECT_FALSE(ErrorsFound);
     // get zone input and connections
-    GetZoneEquipmentData();
+    GetZoneEquipmentData(outputFiles);
     // ZoneInletAirNode = GetVRFTUZoneInletAirNode(VRFTUNum);
     GetVRFInput();
     GetVRFInputFlag = false;

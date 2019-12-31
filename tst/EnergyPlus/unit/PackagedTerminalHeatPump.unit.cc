@@ -447,7 +447,7 @@ TEST_F(PTHPFixture, PackagedTerminalHP_VSCoils_Sizing)
 
     bool ErrorsFound(false);
     GetZoneData(ErrorsFound);
-    GetZoneEquipmentData();
+    GetZoneEquipmentData(outputFiles);
     GetPTUnit();
 
     TotNumLoops = 2;
@@ -802,7 +802,7 @@ TEST_F(PTHPFixture, AirTerminalSingleDuctMixer_SimPTAC_HeatingCoilTest)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
     GetPTUnitInputFlag = false;
@@ -1154,7 +1154,7 @@ TEST_F(PTHPFixture, SimPTAC_SZVAVTest)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
     GetPTUnitInputFlag = false;

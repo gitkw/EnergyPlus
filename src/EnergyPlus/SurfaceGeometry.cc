@@ -8667,7 +8667,8 @@ namespace SurfaceGeometry {
                     SurfaceWindow(SurfNum).AirflowDestination = AirFlowWindow_Destination_OutdoorAir;
                 } else if (UtilityRoutines::SameString(cAlphaArgs(3), "ReturnAir")) {
                     SurfaceWindow(SurfNum).AirflowDestination = AirFlowWindow_Destination_ReturnAir;
-                    int controlledZoneNum = DataZoneEquipment::GetControlledZoneIndex(Surface(SurfNum).ZoneName);
+                    int controlledZoneNum = DataZoneEquipment::GetControlledZoneIndex(outputFiles,
+                                                                                      Surface(SurfNum).ZoneName);
                     if (controlledZoneNum > 0) {
                         DataZoneEquipment::ZoneEquipConfig(controlledZoneNum).ZoneHasAirFlowWindowReturn = true;
                         DataHeatBalance::Zone(Surface(SurfNum).Zone).HasAirFlowWindowReturn = true;
@@ -8681,7 +8682,8 @@ namespace SurfaceGeometry {
                     }
                     std::string callDescription = cCurrentModuleObject + "=" + Surface(SurfNum).Name;
                     SurfaceWindow(SurfNum).AirflowReturnNodePtr =
-                        DataZoneEquipment::GetReturnAirNodeForZone(Surface(SurfNum).ZoneName, retNodeName, callDescription);
+                            DataZoneEquipment::GetReturnAirNodeForZone(outputFiles, Surface(SurfNum).ZoneName,
+                                                                       retNodeName, callDescription);
                     if (SurfaceWindow(SurfNum).AirflowReturnNodePtr == 0) {
                         ShowSevereError(RoutineName + cCurrentModuleObject + "=\"" + Surface(SurfNum).Name +
                                         "\", airflow window return air node not found for " + cAlphaFieldNames(3) + " = " + cAlphaArgs(3));

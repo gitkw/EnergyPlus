@@ -137,7 +137,7 @@ namespace RoomAirModelManager {
         GetAirModelData = true;
     }
 
-    void ManageAirModel(int &ZoneNum)
+    void ManageAirModel(OutputFiles &outputFiles, int &ZoneNum)
     {
 
         // SUBROUTINE INFORMATION:
@@ -221,7 +221,7 @@ namespace RoomAirModelManager {
 
             } else if (SELECT_CASE_var == RoomAirModel_AirflowNetwork) { // RoomAirflowNetwork zone model
                 // simulate room airflow using the AirflowNetwork - based model
-                SimRoomAirModelAirflowNetwork(ZoneNum);
+                SimRoomAirModelAirflowNetwork(outputFiles, ZoneNum);
 
             } else { // mixing air model
                      // do nothing

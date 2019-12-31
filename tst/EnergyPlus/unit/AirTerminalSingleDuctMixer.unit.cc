@@ -344,7 +344,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_GetInputPTAC_InletSide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
 
@@ -594,7 +594,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_ATMInletSide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
     GetPTUnitInputFlag = false;
@@ -925,7 +925,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTAC_ATMSupplySide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
     GetPTUnitInputFlag = false;
@@ -1339,7 +1339,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTHP_ATMInletSide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
     GetPTUnitInputFlag = false;
@@ -1752,7 +1752,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimPTHP_ATMSupplySide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetPTUnit();
     GetPTUnitInputFlag = false;
@@ -2424,7 +2424,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRF_ATMInletSide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
 
     GetVRFInput();
@@ -3101,7 +3101,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRF_ATMSupplySide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
 
     GetVRFInput();
@@ -4851,7 +4851,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRFfluidCntrl_ATMInletSi
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
 
     GetVRFInput();
@@ -6603,7 +6603,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimVRFfluidCntrl_ATMSupplyS
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
 
     GetVRFInput();
@@ -6848,7 +6848,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimUnitVent_ATMInletSide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetUnitVentilatorInput();
     GetUnitVentilatorInputFlag = false;
@@ -7085,7 +7085,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_SimUnitVent_ATMSupplySide)
     GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     GetZoneAirLoopEquipment();
     GetUnitVentilatorInput();
     GetUnitVentilatorInputFlag = false;
@@ -7326,7 +7326,7 @@ TEST_F(EnergyPlusFixture, AirTerminalSingleDuctMixer_GetInputDOASpecs)
 
     SizingManager::GetOARequirements();
     SizingManager::GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ZoneEquipmentManager::SetUpZoneSizingArrays();
     GetZoneAirLoopEquipment();
     GetATMixers();

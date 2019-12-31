@@ -7978,7 +7978,7 @@ namespace HVACVariableRefrigerantFlow {
             // above condition for heat pump mode, below condition for heat recovery mode
             if ((!VRF(VRFCond).HeatRecoveryUsed && CoolingLoad(VRFCond)) ||
                 (VRF(VRFCond).HeatRecoveryUsed && TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList))) {
-                SimDXCoil("",
+                SimDXCoil(outputFiles, "",
                           On,
                           FirstHVACIteration,
                           this->CoolCoilIndex,
@@ -7989,7 +7989,9 @@ namespace HVACVariableRefrigerantFlow {
                           MaxCoolingCapacity(VRFCond),
                           VRF(this->VRFSysNum).VRFCondCyclingRatio);
             } else { // cooling coil is off
-                SimDXCoil("", Off, FirstHVACIteration, this->CoolCoilIndex, OpMode, 0.0, OnOffAirFlowRatio);
+                SimDXCoil(outputFiles, "", Off, FirstHVACIteration, this->CoolCoilIndex, OpMode, 0.0,
+                          OnOffAirFlowRatio, Optional<const Real64>(), Optional<const Real64>(),
+                          Optional<const Real64>());
             }
             LoopDXCoolCoilRTF = LoopDXCoilRTF;
         } else {
@@ -8000,9 +8002,11 @@ namespace HVACVariableRefrigerantFlow {
             // above condition for heat pump mode, below condition for heat recovery mode
             if ((!VRF(VRFCond).HeatRecoveryUsed && HeatingLoad(VRFCond)) ||
                 (VRF(VRFCond).HeatRecoveryUsed && TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList))) {
-                SimDXCoil("", Off, FirstHVACIteration, this->HeatCoilIndex, OpMode, PartLoadRatio, OnOffAirFlowRatio, _, MaxHeatingCapacity(VRFCond));
+                SimDXCoil(outputFiles, "", Off, FirstHVACIteration, this->HeatCoilIndex, OpMode, PartLoadRatio,
+                          OnOffAirFlowRatio, _, MaxHeatingCapacity(VRFCond), Optional<const Real64>());
             } else {
-                SimDXCoil("", Off, FirstHVACIteration, this->HeatCoilIndex, OpMode, 0.0, OnOffAirFlowRatio, _);
+                SimDXCoil(outputFiles, "", Off, FirstHVACIteration, this->HeatCoilIndex, OpMode, 0.0,
+                          OnOffAirFlowRatio, _, Optional<const Real64>(), Optional<const Real64>());
             }
             LoopDXHeatCoilRTF = LoopDXCoilRTF;
         } else {
@@ -11007,7 +11011,7 @@ namespace HVACVariableRefrigerantFlow {
             // above condition for heat pump mode, below condition for heat recovery mode
             if ((!VRF(VRFCond).HeatRecoveryUsed && CoolingLoad(VRFCond)) ||
                 (VRF(VRFCond).HeatRecoveryUsed && TerminalUnitList(TUListIndex).HRCoolRequest(IndexToTUInTUList))) {
-                SimDXCoil("",
+                SimDXCoil(outputFiles, "",
                           On,
                           FirstHVACIteration,
                           this->CoolCoilIndex,
@@ -11018,7 +11022,8 @@ namespace HVACVariableRefrigerantFlow {
                           MaxCoolingCapacity(VRFCond),
                           VRF(this->VRFSysNum).VRFCondCyclingRatio);
             } else { // cooling coil is off
-                SimDXCoil("", Off, FirstHVACIteration, this->CoolCoilIndex, OpMode, 0.0, _);
+                SimDXCoil(outputFiles, "", Off, FirstHVACIteration, this->CoolCoilIndex, OpMode, 0.0, _,
+                          Optional<const Real64>(), Optional<const Real64>(), Optional<const Real64>());
             }
             LoopDXCoolCoilRTF = LoopDXCoilRTF;
         } else {
@@ -11029,9 +11034,11 @@ namespace HVACVariableRefrigerantFlow {
             // above condition for heat pump mode, below condition for heat recovery mode
             if ((!VRF(VRFCond).HeatRecoveryUsed && HeatingLoad(VRFCond)) ||
                 (VRF(VRFCond).HeatRecoveryUsed && TerminalUnitList(TUListIndex).HRHeatRequest(IndexToTUInTUList))) {
-                SimDXCoil("", On, FirstHVACIteration, this->HeatCoilIndex, OpMode, PartLoadRatio, _, _, MaxHeatingCapacity(VRFCond));
+                SimDXCoil(outputFiles, "", On, FirstHVACIteration, this->HeatCoilIndex, OpMode, PartLoadRatio, _, _,
+                          MaxHeatingCapacity(VRFCond), Optional<const Real64>());
             } else {
-                SimDXCoil("", Off, FirstHVACIteration, this->HeatCoilIndex, OpMode, 0.0, _);
+                SimDXCoil(outputFiles, "", Off, FirstHVACIteration, this->HeatCoilIndex, OpMode, 0.0, _,
+                          Optional<const Real64>(), Optional<const Real64>(), Optional<const Real64>());
             }
             LoopDXHeatCoilRTF = LoopDXCoilRTF;
         } else {

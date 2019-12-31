@@ -180,13 +180,8 @@ namespace HVACStandAloneERV {
         ControllerUniqueNames.clear();
     }
 
-    void SimStandAloneERV(std::string const &CompName,   // name of the Stand Alone ERV unit
-                          int const ZoneNum,             // number of zone being served unused1208
-                          bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
-                          Real64 &SensLoadMet,           // net sensible load supplied by the ERV unit to the zone (W)
-                          Real64 &LatLoadMet,            // net latent load supplied by ERV unit to the zone (kg/s),
-                          int &CompIndex                 // pointer to correct component
-    )
+    void SimStandAloneERV(OutputFiles &outputFiles, std::string const &CompName, int const ZoneNum,
+                          bool const FirstHVACIteration, Real64 &SensLoadMet, Real64 &LatLoadMet, int &CompIndex)
     {
 
         // SUBROUTINE INFORMATION:
@@ -238,7 +233,7 @@ namespace HVACStandAloneERV {
         }
 
         // Initialize the Stand Alone ERV unit
-        InitStandAloneERV(StandAloneERVNum, ZoneNum, FirstHVACIteration);
+        InitStandAloneERV(outputFiles, StandAloneERVNum, ZoneNum, FirstHVACIteration);
 
         CalcStandAloneERV(StandAloneERVNum, FirstHVACIteration, SensLoadMet, LatLoadMet);
 
@@ -1182,10 +1177,8 @@ namespace HVACStandAloneERV {
         lAlphaBlanks.deallocate();
     }
 
-    void InitStandAloneERV(int const StandAloneERVNum,   // number of the current Stand Alone ERV unit being simulated
-                           int const ZoneNum,            // number of zone being served unused1208
-                           bool const FirstHVACIteration // TRUE if first HVAC iteration
-    )
+    void InitStandAloneERV(OutputFiles &outputFiles, int const StandAloneERVNum, int const ZoneNum,
+                           bool const FirstHVACIteration)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1292,8 +1285,9 @@ namespace HVACStandAloneERV {
             MyEnvrnFlag(StandAloneERVNum) = false;
             //   Initialize OA Controller on BeginEnvrnFlag
             if (StandAloneERV(StandAloneERVNum).ControllerNameDefined) {
-                SimOAController(
-                    StandAloneERV(StandAloneERVNum).ControllerName, StandAloneERV(StandAloneERVNum).ControllerIndex, FirstHVACIteration, 0);
+                SimOAController(outputFiles,
+                                StandAloneERV(StandAloneERVNum).ControllerName,
+                                StandAloneERV(StandAloneERVNum).ControllerIndex, FirstHVACIteration, 0);
             }
         } // end one time inits
 
@@ -1319,8 +1313,9 @@ namespace HVACStandAloneERV {
             if (StandAloneERV(StandAloneERVNum).ControllerNameDefined) {
                 //     Initialize a flow rate for controller
                 Node(SupInletNode).MassFlowRate = StandAloneERV(StandAloneERVNum).MaxSupAirMassFlow;
-                SimOAController(
-                    StandAloneERV(StandAloneERVNum).ControllerName, StandAloneERV(StandAloneERVNum).ControllerIndex, FirstHVACIteration, 0);
+                SimOAController(outputFiles,
+                                StandAloneERV(StandAloneERVNum).ControllerName,
+                                StandAloneERV(StandAloneERVNum).ControllerIndex, FirstHVACIteration, 0);
             }
 
             if (GetCurrentScheduleValue(StandAloneERV(StandAloneERVNum).SupplyAirFanSchPtr) > 0 || (ZoneCompTurnFansOn && !ZoneCompTurnFansOff)) {

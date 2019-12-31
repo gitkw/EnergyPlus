@@ -254,8 +254,9 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
     Furnaces::HeatingLoad = false;
     Furnaces::CoolingLoad = false;
 
-    CalcNewZoneHeatCoolFlowRates(
-        FurnaceNum, firstHVACIteration, compOp, zoneLoad, moistureLoad, heatCoilLoad, reheatCoilLoad, onOffAirFlowRatio, hXUnitOn);
+    CalcNewZoneHeatCoolFlowRates(outputFiles,
+                                 FurnaceNum, firstHVACIteration, compOp, zoneLoad, moistureLoad, heatCoilLoad,
+                                 reheatCoilLoad, onOffAirFlowRatio, hXUnitOn);
     EXPECT_EQ(Furnace(1).MdotFurnace, 0.5); // CompOnMassFlow rate
     EXPECT_EQ(DataLoopNode::Node(1).MassFlowRate, 0.5); // furnace inlet node mass flow rate
     EXPECT_EQ(Furnace(1).CoolPartLoadRatio, 0.0);
@@ -319,8 +320,9 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
     DataHeatBalance::HeatReclaimSimple_WAHPCoil.allocate(2);
 
     WaterToAirHeatPumpSimple::GetCoilsInputFlag = false; // turn off water source coil GetInput
-    CalcNewZoneHeatCoolFlowRates(
-        FurnaceNum, firstHVACIteration, compOp, zoneLoad, moistureLoad, heatCoilLoad, reheatCoilLoad, onOffAirFlowRatio, hXUnitOn);
+    CalcNewZoneHeatCoolFlowRates(outputFiles,
+                                 FurnaceNum, firstHVACIteration, compOp, zoneLoad, moistureLoad, heatCoilLoad,
+                                 reheatCoilLoad, onOffAirFlowRatio, hXUnitOn);
     EXPECT_EQ(Furnace(1).MdotFurnace, 0.2); // flow rate is at idle speed flow rate
     EXPECT_EQ(DataLoopNode::Node(1).MassFlowRate, 0.2); // furnace inlet node mass flow rate is at idle speed flow rate
     EXPECT_EQ(Furnace(1).CoolPartLoadRatio, 0.0);
@@ -328,8 +330,9 @@ TEST_F(EnergyPlusFixture, SetVSHPAirFlowTest_VSFurnaceFlowTest)
 
     Furnace(1).HeatPartLoadRatio = 1.0;
     Furnaces::HeatingLoad = true;
-    CalcNewZoneHeatCoolFlowRates(
-        FurnaceNum, firstHVACIteration, compOp, zoneLoad, moistureLoad, heatCoilLoad, reheatCoilLoad, onOffAirFlowRatio, hXUnitOn);
+    CalcNewZoneHeatCoolFlowRates(outputFiles,
+                                 FurnaceNum, firstHVACIteration, compOp, zoneLoad, moistureLoad, heatCoilLoad,
+                                 reheatCoilLoad, onOffAirFlowRatio, hXUnitOn);
     EXPECT_EQ(Furnace(1).HeatPartLoadRatio, 1.0);
 
 
@@ -1167,13 +1170,14 @@ TEST_F(EnergyPlusFixture, UnitaryHeatPumpAirToAir_MaxSuppAirTempTest)
     bool FirstHVACIteration(false);
 
     // OutputProcessor::TimeValue.allocate(2);
-    ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    ManageSimulation(outputFiles);
     // check the design max air outlet temperature
     EXPECT_DOUBLE_EQ(45.0, Furnace(1).DesignMaxOutletTemp);
 
     ZoneSysEnergyDemand(1).SequencedOutputRequiredToCoolingSP(1) = 25000.0;
     ZoneSysEnergyDemand(1).SequencedOutputRequiredToHeatingSP(1) = 25000.0;
-    SimFurnace(Furnace(1).Name, FirstHVACIteration, AirLoopNum, CompIndex);
+    SimFurnace(outputFiles, Furnace(1).Name, FirstHVACIteration, AirLoopNum, CompIndex);
     // check the heating mode is On
     EXPECT_TRUE(Furnaces::HeatingLoad);
     // check the cooling mode is Off

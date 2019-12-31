@@ -199,7 +199,7 @@ void HVACSizingSimulationManager::RedoKickOffAndResize()
     RedoSizesHVACSimulation = true;
 
     ResetEnvironmentCounter();
-    SetupSimulation(ErrorsFound);
+    SetupSimulation(m_outputFiles, ErrorsFound);
 
     KickOffSimulation = false;
     RedoSizesHVACSimulation = false;
@@ -217,7 +217,7 @@ void HVACSizingSimulationManager::UpdateSizingLogsSystemStep()
 
 std::unique_ptr<HVACSizingSimulationManager> hvacSizingSimulationManager;
 
-void ManageHVACSizingSimulation(bool &ErrorsFound)
+void ManageHVACSizingSimulation(OutputFiles &outputFiles, bool &ErrorsFound)
 {
     using DataEnvironment::CurMnDy;
     using DataEnvironment::CurrentOverallSimDay;
@@ -235,7 +235,7 @@ void ManageHVACSizingSimulation(bool &ErrorsFound)
     using namespace DataReportingFlags;
     using namespace HeatBalanceManager;
 
-    hvacSizingSimulationManager = std::unique_ptr<HVACSizingSimulationManager>(new HVACSizingSimulationManager());
+    hvacSizingSimulationManager = std::unique_ptr<HVACSizingSimulationManager>(new HVACSizingSimulationManager(outputFiles));
 
     bool Available; // an environment is available to process
     int HVACSizingIterCount;
@@ -361,7 +361,7 @@ void ManageHVACSizingSimulation(bool &ErrorsFound)
 
                         ManageExteriorEnergyUse();
 
-                        ManageHeatBalance();
+                        ManageHeatBalance(outputFiles);
 
                         BeginHourFlag = false;
                         BeginDayFlag = false;

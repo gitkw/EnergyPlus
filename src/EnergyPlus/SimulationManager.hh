@@ -52,6 +52,8 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
+
 namespace SimulationManager {
 
     // Data
@@ -73,7 +75,7 @@ namespace SimulationManager {
     // Functions
     void clear_state();
 
-    void ManageSimulation();
+    void ManageSimulation(OutputFiles &outputFiles);
 
     void GetProjectData();
 
@@ -89,7 +91,7 @@ namespace SimulationManager {
 
     void CloseOutputFiles();
 
-    void SetupSimulation(bool &ErrorsFound);
+    void SetupSimulation(OutputFiles &outputFiles, bool &ErrorsFound);
 
     void ReportNodeConnections();
 
@@ -108,7 +110,8 @@ namespace SimulationManager {
 
 // EXTERNAL SUBROUTINES:
 
-void Resimulate(bool &ResimExt, // Flag to resimulate the exterior energy use simulation
+void Resimulate(OutputFiles &outputFiles,
+                bool &ResimExt, // Flag to resimulate the exterior energy use simulation
                 bool &ResimHB,  // Flag to resimulate the heat balance simulation (including HVAC)
                 bool &ResimHVAC // Flag to resimulate the HVAC simulation
 );

@@ -209,7 +209,7 @@ namespace HeatBalanceSurfaceManager {
         calcHeatBalanceInsideSurfFirstTime = true;
     }
 
-    void ManageSurfaceHeatBalance()
+    void ManageSurfaceHeatBalance(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -245,7 +245,7 @@ namespace HeatBalanceSurfaceManager {
         // The air heat balance must be called before the temperature history
         // updates because there may be a radiant system in the building
         if (ManageSurfaceHeatBalancefirstTime) DisplayString("Calculate Air Heat Balance");
-        ManageAirHeatBalance();
+        ManageAirHeatBalance(outputFiles);
 
         // IF NECESSARY, do one final "average" heat balance pass.  This is only
         // necessary if a radiant system is present and it was actually on for

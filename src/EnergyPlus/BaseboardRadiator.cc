@@ -152,12 +152,8 @@ namespace BaseboardRadiator {
         BaseboardParamsNumericFields.deallocate();
     }
 
-    void SimBaseboard(std::string const &EquipName,
-                      int const ActualZoneNum,
-                      int const ControlledZoneNum,
-                      bool const FirstHVACIteration,
-                      Real64 &PowerMet,
-                      int &CompIndex)
+    void SimBaseboard(OutputFiles &outputFiles, std::string const &EquipName, int const ActualZoneNum,
+                      int const ControlledZoneNum, bool const FirstHVACIteration, Real64 &PowerMet, int &CompIndex)
     {
 
         // SUBROUTINE INFORMATION:
@@ -259,7 +255,7 @@ namespace BaseboardRadiator {
                 MinWaterFlow = Node(Baseboard(BaseboardNum).WaterInletNode).MassFlowRateMinAvail;
             }
 
-            ControlCompOutput(Baseboard(BaseboardNum).EquipID,
+            ControlCompOutput(outputFiles, Baseboard(BaseboardNum).EquipID,
                               cCMO_BBRadiator_Water,
                               BaseboardNum,
                               FirstHVACIteration,
@@ -277,7 +273,7 @@ namespace BaseboardRadiator {
                               _,
                               Baseboard(BaseboardNum).LoopNum,
                               Baseboard(BaseboardNum).LoopSideNum,
-                              Baseboard(BaseboardNum).BranchNum);
+                              Baseboard(BaseboardNum).BranchNum, ObjexxFCL::Optional_int_const());
 
             PowerMet = Baseboard(BaseboardNum).Power;
         }

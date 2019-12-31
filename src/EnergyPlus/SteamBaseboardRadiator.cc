@@ -246,7 +246,7 @@ namespace SteamBaseboardRadiator {
                     auto const SELECT_CASE_var(SteamBaseboard(BaseboardNum).EquipType);
 
                     if (SELECT_CASE_var == TypeOf_Baseboard_Rad_Conv_Steam) { // 'ZoneHVAC:Baseboard:RadiantConvective:Steam'
-                        ControlCompOutput(SteamBaseboard(BaseboardNum).EquipID,
+                        ControlCompOutput(outputFiles, SteamBaseboard(BaseboardNum).EquipID,
                                           cCMO_BBRadiator_Steam,
                                           BaseboardNum,
                                           FirstHVACIteration,
@@ -264,7 +264,7 @@ namespace SteamBaseboardRadiator {
                                           _,
                                           SteamBaseboard(BaseboardNum).LoopNum,
                                           SteamBaseboard(BaseboardNum).LoopSideNum,
-                                          SteamBaseboard(BaseboardNum).BranchNum);
+                                          SteamBaseboard(BaseboardNum).BranchNum, ObjexxFCL::Optional_int_const());
                     } else {
                         ShowSevereError("SimSteamBaseboard: Errors in Baseboard=" + SteamBaseboard(BaseboardNum).EquipID);
                         ShowContinueError("Invalid or unimplemented equipment type=" + TrimSigDigits(SteamBaseboard(BaseboardNum).EquipType));

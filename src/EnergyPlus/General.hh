@@ -63,6 +63,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 // Forward declaration
 namespace OutputProcessor {
@@ -92,6 +93,26 @@ namespace General {
     // PUBLIC  ErfFunction
 
     // Functions
+
+    template<typename Function>
+    struct SolveRootCallback
+    {
+        std::reference_wrapper<OutputFiles> outputFiles;
+        Function function;
+
+        template<typename ... Param>
+        auto operator()(Param && ... param) -> decltype(function(outputFiles, std::forward<Param>(param)...))
+        {
+            return function(outputFiles, std::forward<Param>(param)...);
+        }
+    };
+
+    template<typename Function>
+    SolveRootCallback<Function> callback(OutputFiles &outputFiles, Function function)
+    {
+        return SolveRootCallback<Function>{outputFiles, std::move(function)};
+    }
+
 
     void SolveRoot(Real64 const Eps, // required absolute accuracy
                    int const MaxIte, // maximum number of allowed iterations

@@ -159,7 +159,7 @@ namespace DemandManager {
         UniqueDemandMgrNames.clear();
     }
 
-    void ManageDemand()
+    void ManageDemand(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -242,7 +242,7 @@ namespace DemandManager {
                 while (firstTime || ResimExt || ResimHB || ResimHVAC) {
                     firstTime = false;
 
-                    Resimulate(ResimExt, ResimHB, ResimHVAC);
+                    Resimulate(outputFiles, ResimExt, ResimHB, ResimHVAC);
                     ResimExt = false;
                     ResimHB = false;
                     ResimHVAC = false;

@@ -790,14 +790,14 @@ namespace ZoneAirLoopEquipmentManager {
                                        AirDistUnit(AirDistUnitNum).EquipIndex(AirDistCompNum));
 
                 } else if (SELECT_CASE_var == SingleDuct_SeriesPIU_Reheat) {
-                    SimPIU(AirDistUnit(AirDistUnitNum).EquipName(AirDistCompNum),
+                    SimPIU(outputFiles, AirDistUnit(AirDistUnitNum).EquipName(AirDistCompNum),
                            FirstHVACIteration,
                            ActualZoneNum,
                            ZoneEquipConfig(ControlledZoneNum).ZoneNode,
                            AirDistUnit(AirDistUnitNum).EquipIndex(AirDistCompNum));
 
                 } else if (SELECT_CASE_var == SingleDuct_ParallelPIU_Reheat) {
-                    SimPIU(AirDistUnit(AirDistUnitNum).EquipName(AirDistCompNum),
+                    SimPIU(outputFiles, AirDistUnit(AirDistUnitNum).EquipName(AirDistCompNum),
                            FirstHVACIteration,
                            ActualZoneNum,
                            ZoneEquipConfig(ControlledZoneNum).ZoneNode,

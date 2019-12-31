@@ -169,7 +169,8 @@ TEST_F(HVACSizingSimulationManagerTest, WeatherFileDaysTest3)
     Environment(4).DesignDayNum = 0;
     Environment(4).TotalDays = 4;
 
-    HVACSizingSimulationManager testSizeSimManagerObj;
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    HVACSizingSimulationManager testSizeSimManagerObj{outputFiles};
 
     testSizeSimManagerObj.DetermineSizingAnalysesNeeded();
 
@@ -362,7 +363,8 @@ TEST_F(HVACSizingSimulationManagerTest, TopDownTestSysTimestep3)
     // to coincident plant sizing with HVAC sizing simulation
     // this test runs 3 system timesteps for each zone timestep
 
-    HVACSizingSimulationManager testSizeSimManagerObj;
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    HVACSizingSimulationManager testSizeSimManagerObj{outputFiles};
 
     testSizeSimManagerObj.DetermineSizingAnalysesNeeded();
 
@@ -495,7 +497,8 @@ TEST_F(HVACSizingSimulationManagerTest, TopDownTestSysTimestep1)
     GlobalCoolSizingFactor = 1.0;
     PlantSizData(NumPltSizInput).SizingFactorOption = GlobalCoolingSizingFactorMode;
 
-    HVACSizingSimulationManager testSizeSimManagerObj;
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    HVACSizingSimulationManager testSizeSimManagerObj{outputFiles};
 
     testSizeSimManagerObj.DetermineSizingAnalysesNeeded();
 
@@ -579,7 +582,8 @@ TEST_F(HVACSizingSimulationManagerTest, VarySysTimesteps)
     GlobalHeatSizingFactor = 1.0;
     PlantSizData(NumPltSizInput).SizingFactorOption = GlobalHeatingSizingFactorMode;
 
-    HVACSizingSimulationManager testSizeSimManagerObj;
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    HVACSizingSimulationManager testSizeSimManagerObj{outputFiles};
 
     testSizeSimManagerObj.DetermineSizingAnalysesNeeded();
 

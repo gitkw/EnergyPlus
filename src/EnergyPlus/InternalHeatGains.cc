@@ -1413,7 +1413,10 @@ namespace InternalHeatGains {
                         }
                     }
                     if (Lights(Loop).ZonePtr > 0) {
-                        Lights(Loop).ZoneReturnNum = DataZoneEquipment::GetReturnNumForZone(Zone(Lights(Loop).ZonePtr).Name, retNodeName);
+                        Lights(Loop).ZoneReturnNum = DataZoneEquipment::GetReturnNumForZone(outputFiles,
+                                                                                            Zone(Lights(
+                                                                                                    Loop).ZonePtr).Name,
+                                                                                            retNodeName);
                     }
 
                     if ((Lights(Loop).ZoneReturnNum == 0) && (Lights(Loop).FractionReturnAir > 0.0) && (!lAlphaFieldBlanks(7))) {

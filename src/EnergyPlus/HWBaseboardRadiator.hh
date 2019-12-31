@@ -176,7 +176,8 @@ namespace HWBaseboardRadiator {
 
     // Functions
 
-    void SimHWBaseboard(std::string const &EquipName,
+    void SimHWBaseboard(OutputFiles &outputFiles,
+                        std::string const &EquipName,
                         int const ActualZoneNum,
                         int const ControlledZoneNum,
                         bool const FirstHVACIteration,

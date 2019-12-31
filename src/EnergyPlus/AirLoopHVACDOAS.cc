@@ -105,8 +105,9 @@ namespace AirLoopHVACDOAS {
     {
     }
 
-    AirLoopDOAS::AirLoopDOAS() // constructor
-        : SumMassFlowRate(0.0), PreheatTemp(-999.0), PrecoolTemp(-999.0), PreheatHumRat(-999.0), PrecoolHumRat(-999.0), SizingMassFlow(0.0),
+    AirLoopDOAS::AirLoopDOAS(OutputFiles &outputFiles) // constructor
+        : m_outputFiles(outputFiles),
+          SumMassFlowRate(0.0), PreheatTemp(-999.0), PrecoolTemp(-999.0), PreheatHumRat(-999.0), PrecoolHumRat(-999.0), SizingMassFlow(0.0),
           SizingCoolOATemp(-999.0), SizingCoolOAHumRat(-999.0), HeatOutTemp(0.0), HeatOutHumRat(0.0), m_OASystemNum(0), m_AvailManagerSchedPtr(0),
           m_AirLoopMixerIndex(-1), m_AirLoopSplitterIndex(-1), NumOfAirLoops(0), m_InletNodeNum(0), m_OutletNodeNum(0), m_FanIndex(-1),
           m_FanInletNodeNum(0), m_FanOutletNodeNum(0), m_FanTypeNum(0), m_HeatCoilNum(0), m_CoolCoilNum(0), ConveCount(0), ConveIndex(0),
@@ -136,7 +137,7 @@ namespace AirLoopHVACDOAS {
         // Obtains and Allocates unitary system related parameters from input file
         if (GetInputOnceFlag) {
             // Get the AirLoopHVACDOAS input
-            getAirLoopDOASInput();
+            getAirLoopDOASInput(m_outputFiles);
             GetInputOnceFlag = false;
         }
 
@@ -398,7 +399,7 @@ namespace AirLoopHVACDOAS {
         }
     } // namespace AirLoopSplitter
 
-    void AirLoopDOAS::getAirLoopDOASInput()
+    void AirLoopDOAS::getAirLoopDOASInput(OutputFiles &outputFiles)
     {
 
         using DataAirLoop::OutsideAirSys;
@@ -422,7 +423,7 @@ namespace AirLoopHVACDOAS {
                 auto const &thisObjectName = instance.key();
                 inputProcessor->markObjectAsUsed(cCurrentModuleObject, thisObjectName);
                 ++AirLoopDOASNum;
-                AirLoopDOAS thisDOAS;
+                AirLoopDOAS thisDOAS(outputFiles);
 
                 thisDOAS.Name = UtilityRoutines::MakeUPPERCase(thisObjectName);
                 // get OA and avail num
@@ -630,13 +631,15 @@ namespace AirLoopHVACDOAS {
                         if (errorsFound) OutletNodeErrFlag = true;
                     } else if (SELECT_CASE_var == "COILSYSTEM:COOLING:DX") {
                         OutsideAirSys(thisDOAS.m_OASystemNum).InletNodeNum(CompNum) =
-                            HVACDXSystem::GetCoolingCoilInletNodeNum(OutsideAirSys(thisDOAS.m_OASystemNum).ComponentName(CompNum));
+                                HVACDXSystem::GetCoolingCoilInletNodeNum(outputFiles, OutsideAirSys(
+                                        thisDOAS.m_OASystemNum).ComponentName(CompNum));
                         if (OutsideAirSys(thisDOAS.m_OASystemNum).InletNodeNum(CompNum) == 0) {
                             InletNodeErrFlag = true;
                             errorsFound = true;
                         }
                         OutsideAirSys(thisDOAS.m_OASystemNum).OutletNodeNum(CompNum) =
-                            HVACDXSystem::GetCoolingCoilOutletNodeNum(OutsideAirSys(thisDOAS.m_OASystemNum).ComponentName(CompNum));
+                                HVACDXSystem::GetCoolingCoilOutletNodeNum(outputFiles, OutsideAirSys(
+                                        thisDOAS.m_OASystemNum).ComponentName(CompNum));
                         if (OutsideAirSys(thisDOAS.m_OASystemNum).OutletNodeNum(CompNum) == 0) {
                             OutletNodeErrFlag = true;
                             errorsFound = true;
@@ -1021,7 +1024,7 @@ namespace AirLoopHVACDOAS {
                 DataLoopNode::Node(OutsideAirSys(this->m_OASystemNum).InletNodeNum(1)).MassFlowRateMaxAvail = this->SumMassFlowRate;
             }
         }
-        ManageOutsideAirSystem(this->OASystemName, FirstHVACIteration, 0, this->m_OASystemNum);
+        ManageOutsideAirSystem(m_outputFiles, this->OASystemName, FirstHVACIteration, 0, this->m_OASystemNum);
         Real64 Temp = DataLoopNode::Node(this->m_OutletNodeNum).Temp;
         Real64 HumRat = DataLoopNode::Node(this->m_OutletNodeNum).HumRat;
         DataLoopNode::Node(this->m_OutletNodeNum).Enthalpy = Psychrometrics::PsyHFnTdbW(Temp, HumRat);
@@ -1066,10 +1069,10 @@ namespace AirLoopHVACDOAS {
         DataSizing::CurOASysNum = this->m_OASystemNum;
     }
 
-    void getAirLoopHVACDOASInput()
+    void getAirLoopHVACDOASInput(OutputFiles &outputFiles)
     {
         if (GetInputOnceFlag) {
-            AirLoopDOAS::getAirLoopDOASInput();
+            AirLoopDOAS::getAirLoopDOASInput(outputFiles);
             GetInputOnceFlag = false;
         }
     }

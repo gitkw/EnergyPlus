@@ -525,7 +525,8 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_VBMaximizeBeamSolar)
     ASSERT_TRUE(process_idf(idf_objects));
 
     // OutputProcessor::TimeValue.allocate(2); //
-    SimulationManager::ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles);
     // re-set the hour of the day to mide day
     DataGlobals::TimeStep = 1;
     DataGlobals::HourOfDay = 12;
@@ -882,7 +883,8 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_VBBlockBeamSolar)
     ASSERT_TRUE(process_idf(idf_objects));
 
     // OutputProcessor::TimeValue.allocate(2);
-    SimulationManager::ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles);
     // re-set the hour of the day to noon
     DataGlobals::TimeStep = 1;
     DataGlobals::HourOfDay = 12;
@@ -1236,7 +1238,8 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_AirGapOutdoorVentedTest)
     });
     ASSERT_TRUE(process_idf(idf_objects));
 
-    SimulationManager::ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles);
 
     int EQLNum(1);
     Array1D<Real64> T({1, CFSMAXNL}, 0.0);
@@ -1560,7 +1563,8 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_AirGapIndoorVentedTest)
     });
     ASSERT_TRUE(process_idf(idf_objects));
 
-    SimulationManager::ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles);
 
     int EQLNum(1);
     Array1D<Real64> T({1, CFSMAXNL}, 0.0);
@@ -1948,7 +1952,8 @@ TEST_F(EnergyPlusFixture, WindowEquivalentLayer_VBEffectiveEmissivityTest)
     });
     ASSERT_TRUE(process_idf(idf_objects));
 
-    SimulationManager::ManageSimulation();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles);
 
     int EQLNum(0);
     int SurfNum(0);

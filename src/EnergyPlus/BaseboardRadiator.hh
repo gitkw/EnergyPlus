@@ -54,6 +54,7 @@
 // EnergyPlus Headers
 #include <EnergyPlus/DataGlobals.hh>
 #include <EnergyPlus/EnergyPlus.hh>
+#include "OutputFiles.hh"
 
 namespace EnergyPlus {
 
@@ -150,7 +151,8 @@ namespace BaseboardRadiator {
 
     void clear_state();
 
-    void SimBaseboard(std::string const &EquipName,
+    void SimBaseboard(EnergyPlus::OutputFiles &outputFiles,
+                      std::string const &EquipName,
                       int const ActualZoneNum,
                       int const ControlledZoneNum,
                       bool const FirstHVACIteration,

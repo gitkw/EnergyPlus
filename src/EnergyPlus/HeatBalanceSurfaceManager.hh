@@ -55,6 +55,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace DataSurfaces {
     struct SurfaceData;
@@ -91,7 +92,7 @@ namespace HeatBalanceSurfaceManager {
     // Functions
     void clear_state();
 
-    void ManageSurfaceHeatBalance();
+    void ManageSurfaceHeatBalance(OutputFiles &outputFiles);
 
     // Beginning Initialization Section of the Module
     //******************************************************************************

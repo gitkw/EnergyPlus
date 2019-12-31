@@ -725,7 +725,8 @@ TEST_F(EnergyPlusFixture, PlantLoopSourceSideTest)
     DataGlobals::KickOffSimulation = true;
 
     WeatherManager::ResetEnvironmentCounter();
-    SimulationManager::SetupSimulation(ErrorsFound);
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::SetupSimulation(outputFiles, ErrorsFound);
     DataGlobals::KickOffSimulation = false;
 
     int EnvCount = 0;
@@ -786,7 +787,7 @@ TEST_F(EnergyPlusFixture, PlantLoopSourceSideTest)
 
                     WeatherManager::ManageWeather();
 
-                    HeatBalanceManager::ManageHeatBalance();
+                    HeatBalanceManager::ManageHeatBalance(outputFiles);
 
                     //  After the first iteration of HeatBalance, all the 'input' has been gotten
 
@@ -1470,12 +1471,13 @@ TEST_F(EnergyPlusFixture, WWHP_AutosizeTest1)
     PlantManager::CheckIfAnyPlant();
 
     BranchInputManager::ManageBranchInput(); // just gets input and
-    SizingManager::ManageSizing();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SizingManager::ManageSizing(outputFiles);
     DataGlobals::DoingSizing = false;
     DataGlobals::KickOffSimulation = true;
 
     WeatherManager::ResetEnvironmentCounter();
-    SimulationManager::SetupSimulation(ErrorsFound);
+    SimulationManager::SetupSimulation(outputFiles, ErrorsFound);
     DataGlobals::KickOffSimulation = false;
 
     // should be sized now

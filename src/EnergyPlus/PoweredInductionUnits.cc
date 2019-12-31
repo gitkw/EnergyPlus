@@ -174,12 +174,8 @@ namespace PoweredInductionUnits {
         PIU.deallocate();
     }
 
-    void SimPIU(std::string const &CompName,   // name of the PIU
-                bool const FirstHVACIteration, // TRUE if first HVAC iteration in time step
-                int const ZoneNum,             // index of zone served by PIU
-                int const ZoneNodeNum,         // zone node number of zone served by PIU
-                int &CompIndex                 // PIU Index in PIU names
-    )
+    void SimPIU(OutputFiles &outputFiles, std::string const &CompName, bool const FirstHVACIteration, int const ZoneNum,
+                int const ZoneNodeNum, int &CompIndex)
     {
 
         // SUBROUTINE INFORMATION:
@@ -241,11 +237,11 @@ namespace PoweredInductionUnits {
 
             if (SELECT_CASE_var == SingleDuct_SeriesPIU_Reheat) { //  'AirTerminal:SingleDuct:SeriesPIU:Reheat'
 
-                CalcSeriesPIU(PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
+                CalcSeriesPIU(outputFiles, PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
 
             } else if (SELECT_CASE_var == SingleDuct_ParallelPIU_Reheat) { // 'AirTerminal:SingleDuct:ParallelPIU:Reheat'
 
-                CalcParallelPIU(PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
+                CalcParallelPIU(outputFiles, PIUNum, ZoneNum, ZoneNodeNum, FirstHVACIteration);
 
             } else {
                 ShowSevereError("Illegal PI Unit Type used=" + PIU(PIUNum).UnitType);
@@ -1473,11 +1469,8 @@ namespace PoweredInductionUnits {
         }
     }
 
-    void CalcSeriesPIU(int const PIUNum,             // number of the current PIU being simulated
-                       int const ZoneNum,            // number of zone being served
-                       int const ZoneNode,           // zone node number
-                       bool const FirstHVACIteration // TRUE if 1st HVAC simulation of system timestep
-    )
+    void CalcSeriesPIU(OutputFiles &outputFiles, int const PIUNum, int const ZoneNum, int const ZoneNode,
+                       bool const FirstHVACIteration)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1700,7 +1693,8 @@ namespace PoweredInductionUnits {
                     SimulateWaterCoilComponents(PIU(PIUNum).HCoil, FirstHVACIteration, PIU(PIUNum).HCoil_Index);
                 } else {
                     // control water flow to obtain output matching QZnReq
-                    ControlCompOutput(PIU(PIUNum).HCoil,
+                    ControlCompOutput(outputFiles,
+                                      PIU(PIUNum).HCoil,
                                       PIU(PIUNum).UnitType,
                                       PIU(PIUNum).HCoil_Index,
                                       FirstHVACIteration,
@@ -1718,7 +1712,7 @@ namespace PoweredInductionUnits {
                                       _,
                                       PIU(PIUNum).HWLoopNum,
                                       PIU(PIUNum).HWLoopSide,
-                                      PIU(PIUNum).HWBranchNum);
+                                      PIU(PIUNum).HWBranchNum, ObjexxFCL::Optional_int_const());
                 }
             } else if (SELECT_CASE_var == HCoilType_SteamAirHeating) { // COIL:STEAM:AIRHEATING
                 if (!HCoilOn) {
@@ -1763,11 +1757,8 @@ namespace PoweredInductionUnits {
         Node(OutletNode).MassFlowRateMax = PIU(PIUNum).MaxTotAirMassFlow;
     }
 
-    void CalcParallelPIU(int const PIUNum,             // number of the current PIU being simulated
-                         int const ZoneNum,            // number of zone being served
-                         int const ZoneNode,           // zone node number
-                         bool const FirstHVACIteration // TRUE if 1st HVAC simulation of system timestep
-    )
+    void CalcParallelPIU(OutputFiles &outputFiles, int const PIUNum, int const ZoneNum, int const ZoneNode,
+                         bool const FirstHVACIteration)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1982,7 +1973,7 @@ namespace PoweredInductionUnits {
                     SimulateWaterCoilComponents(PIU(PIUNum).HCoil, FirstHVACIteration, PIU(PIUNum).HCoil_Index);
                 } else {
                     // control water flow to obtain output matching QZnReq
-                    ControlCompOutput(PIU(PIUNum).HCoil,
+                    ControlCompOutput(outputFiles, PIU(PIUNum).HCoil,
                                       PIU(PIUNum).UnitType,
                                       PIU(PIUNum).HCoil_Index,
                                       FirstHVACIteration,
@@ -2000,7 +1991,7 @@ namespace PoweredInductionUnits {
                                       _,
                                       PIU(PIUNum).HWLoopNum,
                                       PIU(PIUNum).HWLoopSide,
-                                      PIU(PIUNum).HWBranchNum);
+                                      PIU(PIUNum).HWBranchNum, ObjexxFCL::Optional_int_const());
                 }
             } else if (SELECT_CASE_var == HCoilType_SteamAirHeating) { // COIL:STEAM:AIRHEATING
                 if (!HCoilOn) {

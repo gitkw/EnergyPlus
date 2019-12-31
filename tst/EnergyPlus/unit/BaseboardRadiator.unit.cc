@@ -384,7 +384,7 @@ TEST_F(EnergyPlusFixture, BaseboardConvWater_SizingTest)
         loopsidebranch.Comp.allocate(1);
     }
 
-    DataZoneEquipment::GetZoneEquipmentData1();
+    DataZoneEquipment::GetZoneEquipmentData1(outputFiles);
     // get electric baseboard inputs
     BaseboardRadiator::GetBaseboardInput();
     BaseboardRadiator::MySizeFlag.allocate(3);

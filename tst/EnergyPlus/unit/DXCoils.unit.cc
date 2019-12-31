@@ -1709,7 +1709,8 @@ TEST_F(EnergyPlusFixture, TestMultiSpeedCoolingCrankcaseOutput)
 
     DataGlobals::SysSizingCalc = true;
 
-    InitDXCoil(1);
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    InitDXCoil(outputFiles, 1);
 
     EXPECT_FALSE(DXCoil(1).ReportCoolingCoilCrankcasePower);
     // These two output variables are listed in rdd for Coil:Cooling:DX:MultiSpeed used for AC only

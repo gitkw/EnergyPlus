@@ -116,27 +116,13 @@ enum GeneralRoutinesEquipNums
     VentilatedSlabNum = 11
 };
 
-void ControlCompOutput(std::string const &CompName,           // the component Name
-                       std::string const &CompType,           // Type of component
-                       int &CompNum,                          // Index of component in component array
-                       bool const FirstHVACIteration,         // flag for 1st HVAV iteration in the time step
-                       Real64 const QZnReq,                   // zone load to be met
-                       int const ActuatedNode,                // node that controls unit output
-                       Real64 const MaxFlow,                  // maximum water flow
-                       Real64 const MinFlow,                  // minimum water flow
-                       Real64 const ControlOffset,            // really the tolerance
-                       int &ControlCompTypeNum,               // Internal type num for CompType
-                       int &CompErrIndex,                     // for Recurring error call
-                       Optional_int_const TempInNode,         // inlet node for output calculation
-                       Optional_int_const TempOutNode,        // outlet node for output calculation
-                       Optional<Real64 const> AirMassFlow,    // air mass flow rate
-                       Optional_int_const Action,             // 1=reverse; 2=normal
-                       Optional_int_const EquipIndex,         // Identifier for equipment of Outdoor Air Unit "ONLY"
-                       Optional_int_const LoopNum,            // for plant components, plant loop index
-                       Optional_int_const LoopSide,           // for plant components, plant loop side index
-                       Optional_int_const BranchIndex,        // for plant components, plant branch index
-                       Optional_int_const ControlledZoneIndex // controlled zone index for the zone containing the component
-)
+void ControlCompOutput(OutputFiles &outputFiles, std::string const &CompName, std::string const &CompType, int &CompNum,
+                       bool const FirstHVACIteration, Real64 const QZnReq, int const ActuatedNode, Real64 const MaxFlow,
+                       Real64 const MinFlow, Real64 const ControlOffset, int &ControlCompTypeNum, int &CompErrIndex,
+                       Optional_int_const TempInNode, Optional_int_const TempOutNode,
+                       Optional<Real64 const> AirMassFlow, Optional_int_const Action, Optional_int_const EquipIndex,
+                       Optional_int_const LoopNum, Optional_int_const LoopSide, Optional_int_const BranchIndex,
+                       Optional_int_const ControlledZoneIndex)
 {
 
     // SUBROUTINE INFORMATION:
@@ -561,14 +547,15 @@ void ControlCompOutput(std::string const &CompName,           // the component N
 
         case FourPipeFanCoilNum: // 'ZONEHVAC:FOURPIPEFANCOIL'
             // Simulate fancoil unit
-            Calc4PipeFanCoil(CompNum, ControlledZoneIndex, FirstHVACIteration, LoadMet);
+            Calc4PipeFanCoil(outputFiles, CompNum, ControlledZoneIndex, FirstHVACIteration, LoadMet,
+                             Optional<Real64>());
             // Calculate the control signal (the variable we are forcing to zero)
             ZoneController.SensedValue = (LoadMet - QZnReq) / Denom;
             break;
 
         case OutdoorAirUnitNum: //'ZONEHVAC:OUTDOORAIRUNIT'
             // Simulate outdoor air unit components
-            CalcOAUnitCoilComps(CompNum, FirstHVACIteration, EquipIndex, LoadMet); // Autodesk:OPTIONAL EquipIndex used without PRESENT check
+            CalcOAUnitCoilComps(outputFiles, CompNum, FirstHVACIteration, EquipIndex, LoadMet); // Autodesk:OPTIONAL EquipIndex used without PRESENT check
             // Calculate the control signal (the variable we are forcing to zero)
             ZoneController.SensedValue = (LoadMet - QZnReq) / Denom;
             break;

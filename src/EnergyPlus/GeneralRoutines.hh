@@ -58,7 +58,8 @@
 
 namespace EnergyPlus {
 
-void ControlCompOutput(std::string const &CompName,               // the component Name
+void ControlCompOutput(OutputFiles &outputFiles,
+                       std::string const &CompName,               // the component Name
                        std::string const &CompType,               // Type of component
                        int &CompNum,                              // Index of component in component array
                        bool const FirstHVACIteration,             // flag for 1st HVAV iteration in the time step

@@ -3736,7 +3736,7 @@ namespace ZoneTempPredictorCorrector {
                 // RoomAirflowNetworkModel - make dynamic term independent of TimeStepSys
                 if (RoomAirflowNetworkZoneInfo(ZoneNum).IsUsed) {
                     RoomAirNode = RoomAirflowNetworkZoneInfo(ZoneNum).ControlAirNodeID;
-                    LoadPredictionRoomAirModelAirflowNetwork(ZoneNum, RoomAirNode);
+                    LoadPredictionRoomAirModelAirflowNetwork(outputFiles, ZoneNum, RoomAirNode);
                     TempDepCoef = RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumHA +
                                   RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumLinkMCp;
                     TempIndCoef = RoomAirflowNetworkZoneInfo(ZoneNum).Node(RoomAirNode).SumIntSensibleGain +
@@ -4989,7 +4989,7 @@ namespace ZoneTempPredictorCorrector {
 
             AirCap = AIRRAT(ZoneNum);
 
-            ManageAirModel(ZoneNum);
+            ManageAirModel(outputFiles, ZoneNum);
 
             // Calculate the various heat balance sums
             CalcZoneSums(ZoneNum, SumIntGain, SumHA, SumHATsurf, SumHATref, SumMCp, SumMCpT, SumSysMCp, SumSysMCpT);

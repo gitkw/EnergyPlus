@@ -138,7 +138,8 @@ namespace HVACDXHeatPumpSystem {
 
     void clear_state();
 
-    void SimDXHeatPumpSystem(std::string const &DXHeatPumpSystemName,   // Name of DXSystem:Airloop object
+    void SimDXHeatPumpSystem(OutputFiles &outputFiles,
+                             std::string const &DXHeatPumpSystemName,   // Name of DXSystem:Airloop object
                              bool const FirstHVACIteration,             // True when first HVAC iteration
                              int const AirLoopNum,                      // Primary air loop number
                              int &CompIndex,                            // Index to CoilSystem:Heating:DX object
@@ -170,7 +171,8 @@ namespace HVACDXHeatPumpSystem {
     // Beginning of Calculation subroutines for the DXCoolingSystem Module
     // *****************************************************************************
 
-    void ControlDXHeatingSystem(int const DXSystemNum,        // index to DXSystem
+    void ControlDXHeatingSystem(OutputFiles &outputFiles,
+                                int const DXSystemNum,        // index to DXSystem
                                 bool const FirstHVACIteration // First HVAC iteration flag
     );
 

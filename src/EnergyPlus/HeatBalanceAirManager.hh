@@ -52,6 +52,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace HeatBalanceAirManager {
 
@@ -72,7 +73,7 @@ namespace HeatBalanceAirManager {
     // Functions
     void clear_state();
 
-    void ManageAirHeatBalance();
+    void ManageAirHeatBalance(OutputFiles &outputFiles);
 
     // Get Input Section of the Module
     //******************************************************************************
@@ -106,7 +107,7 @@ namespace HeatBalanceAirManager {
     // Begin Algorithm Section of the Module
     //******************************************************************************
 
-    void CalcHeatBalanceAir();
+    void CalcHeatBalanceAir(OutputFiles &outputFiles);
 
     // END Algorithm Section of the Module
 

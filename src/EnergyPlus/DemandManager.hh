@@ -56,6 +56,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace DemandManager {
 
@@ -84,7 +85,6 @@ namespace DemandManager {
     extern int const CheckCanReduce;
     extern int const SetLimit;
     extern int const ClearLimit;
-
     // DERIVED TYPE DEFINITIONS:
 
     // MODULE VARIABLE TYPE DECLARATIONS:
@@ -181,7 +181,7 @@ namespace DemandManager {
 
     // Functions
 
-    void ManageDemand();
+    void ManageDemand(EnergyPlus::OutputFiles &outputFiles);
 
     void SimulateDemandManagerList(int const ListNum,
                                    bool &ResimExt, // Flag to resimulate the exterior energy use simulation

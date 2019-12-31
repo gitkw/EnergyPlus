@@ -52,6 +52,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace RoomAirModelAirflowNetwork {
 
@@ -72,7 +73,7 @@ namespace RoomAirModelAirflowNetwork {
         // functions
 
         //*****************************************************************************************
-        void InitRoomAirModelAirflowNetwork(int const RoomAirNode); // index number for the specified zone and room air node
+        void InitRoomAirModelAirflowNetwork(OutputFiles &outputFiles, int const RoomAirNode); // index number for the specified zone and room air node
 
         //*****************************************************************************************
         void CalcRoomAirModelAirflowNetwork(int const ThisRoomAirNode); // index number for the specified zone and room air node
@@ -84,7 +85,7 @@ namespace RoomAirModelAirflowNetwork {
         void CalcNodeSums(int const RoomAirNode); // index number for the specified zone and room air node
 
         //*****************************************************************************************
-        void SumNonAirSystemResponseForNode(int const RoomAirNode); // index number for the specified zone and room air node
+        void SumNonAirSystemResponseForNode(OutputFiles &outputFiles, int const RAFNNodeNum); // index number for the specified zone and room air node
         //*****************************************************************************************
         void SumSystemDepResponseForNode(); // index number for the specified zone and room air node
 
@@ -98,9 +99,9 @@ namespace RoomAirModelAirflowNetwork {
 
     void clear_state();
 
-    void SimRoomAirModelAirflowNetwork(int const ZoneNum); // index number for the specified zone
+    void SimRoomAirModelAirflowNetwork(OutputFiles &outputFiles, int const ZoneNum); // index number for the specified zone
 
-    void LoadPredictionRoomAirModelAirflowNetwork(int const ZoneNum, int const RoomAirNode); // index number for the specified zone and node
+    void LoadPredictionRoomAirModelAirflowNetwork(OutputFiles &outputFiles, int const ZoneNum, int const RoomAirNode); // index number for the specified zone and node
 
     //*****************************************************************************************
 

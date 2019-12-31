@@ -212,7 +212,7 @@ namespace SimulationManager {
         PreP_Fatal = false;
     }
 
-    void ManageSimulation()
+    void ManageSimulation(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -359,7 +359,7 @@ namespace SimulationManager {
         ManageBranchInput(); // just gets input and returns.
 
         DoingSizing = true;
-        ManageSizing();
+        ManageSizing(outputFiles);
 
         BeginFullSimFlag = true;
         SimsDone = false;
@@ -379,7 +379,7 @@ namespace SimulationManager {
         }
 
         DisplayString("Adjusting Air System Sizing");
-        SizingManager::ManageSystemSizingAdjustments();
+        SizingManager::ManageSystemSizingAdjustments(outputFiles);
 
         DisplayString("Adjusting Standard 62.1 Ventilation Sizing");
         SizingManager::ManageSystemVentilationAdjustments();
@@ -388,9 +388,9 @@ namespace SimulationManager {
         KickOffSimulation = true;
 
         ResetEnvironmentCounter();
-        SetupSimulation(ErrorsFound);
+        SetupSimulation(outputFiles, ErrorsFound);
 
-        CheckAndReadFaults();
+        CheckAndReadFaults(outputFiles);
 
         InitCurveReporting();
 
@@ -461,7 +461,7 @@ namespace SimulationManager {
 
         // if user requested HVAC Sizing Simulation, call HVAC sizing simulation manager
         if (DoHVACSizingSimulation) {
-            ManageHVACSizingSimulation(ErrorsFound);
+            ManageHVACSizingSimulation(outputFiles, ErrorsFound);
         }
 
         ShowMessage("Beginning Simulation");
@@ -603,7 +603,7 @@ namespace SimulationManager {
 
                         ManageExteriorEnergyUse();
 
-                        ManageHeatBalance();
+                        ManageHeatBalance(outputFiles);
 
                         if (oneTimeUnderwaterBoundaryCheck) {
                             AnyUnderwaterBoundaries = WeatherManager::CheckIfAnyUnderwaterBoundaries();
@@ -1873,7 +1873,7 @@ namespace SimulationManager {
         }
     }
 
-    void SetupSimulation(bool &ErrorsFound)
+    void SetupSimulation(OutputFiles &outputFiles, bool &ErrorsFound)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1943,7 +1943,7 @@ namespace SimulationManager {
 
             ManageExteriorEnergyUse();
 
-            ManageHeatBalance();
+            ManageHeatBalance(outputFiles);
 
             BeginHourFlag = false;
             BeginDayFlag = false;
@@ -1958,7 +1958,7 @@ namespace SimulationManager {
 
             ManageExteriorEnergyUse();
 
-            ManageHeatBalance();
+            ManageHeatBalance(outputFiles);
 
             //         do an end of day, end of environment time step
 
@@ -1971,7 +1971,7 @@ namespace SimulationManager {
 
             ManageExteriorEnergyUse();
 
-            ManageHeatBalance();
+            ManageHeatBalance(outputFiles);
 
         } // ... End environment loop.
 
@@ -2915,10 +2915,7 @@ namespace SimulationManager {
 
 // EXTERNAL SUBROUTINES:
 
-void Resimulate(bool &ResimExt, // Flag to resimulate the exterior energy use simulation
-                bool &ResimHB,  // Flag to resimulate the heat balance simulation (including HVAC)
-                bool &ResimHVAC // Flag to resimulate the HVAC simulation
-)
+void Resimulate(OutputFiles &outputFiles, bool &ResimExt, bool &ResimHB, bool &ResimHVAC)
 {
 
     // SUBROUTINE INFORMATION:
@@ -3025,7 +3022,7 @@ void Resimulate(bool &ResimExt, // Flag to resimulate the exterior energy use si
         CalcAirFlowSimple(0, ZoneAirMassFlow.EnforceZoneMassBalance);
         ManageZoneAirUpdates(iPredictStep, ZoneTempChange, false, UseZoneTimeStepHistory, 0.0);
         if (Contaminant.SimulateContaminants) ManageZoneContaminanUpdates(iPredictStep, false, UseZoneTimeStepHistory, 0.0);
-        SimHVAC();
+        SimHVAC(outputFiles);
 
         ++DemandManagerHVACIterations;
     }

@@ -56,6 +56,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace FaultsManager {
 
@@ -405,7 +406,7 @@ namespace FaultsManager {
 
     // Functions
 
-    void CheckAndReadFaults();
+    void CheckAndReadFaults(OutputFiles &outputFiles);
 
     void clear_state();
 

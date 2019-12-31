@@ -219,7 +219,7 @@ namespace DataZoneEquipment {
         UniqueZoneEquipListNames.clear();
     }
 
-    void GetZoneEquipmentData()
+    void GetZoneEquipmentData(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -256,10 +256,10 @@ namespace DataZoneEquipment {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         // na
 
-        GetZoneEquipmentData1();
+        GetZoneEquipmentData1(outputFiles);
     }
 
-    void GetZoneEquipmentData1()
+    void GetZoneEquipmentData1(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -673,8 +673,8 @@ namespace DataZoneEquipment {
 
                         } else if (SELECT_CASE_var == "AIRLOOPHVAC:UNITARYSYSTEM") { // Unitary System
                             thisZoneEquipList.EquipType_Num(ZoneEquipTypeNum) = ZoneUnitarySys_Num;
-                            UnitarySystems::UnitarySys thisSys;
-                            thisZoneEquipList.compPointer[ZoneEquipTypeNum] = thisSys.factory(
+                            UnitarySystems::UnitarySys thisSys(outputFiles);
+                            thisZoneEquipList.compPointer[ZoneEquipTypeNum] = thisSys.factory(outputFiles,
                                 DataHVACGlobals::UnitarySys_AnyCoilType, thisZoneEquipList.EquipName(ZoneEquipTypeNum), true, 0);
 
                         } else if (SELECT_CASE_var == "ZONEHVAC:DEHUMIDIFIER:DX") { // Zone dehumidifier
@@ -1240,7 +1240,8 @@ namespace DataZoneEquipment {
         return IsOnList;
     }
 
-    int GetControlledZoneIndex(std::string const &ZoneName) // Zone name to match into Controlled Zone structure
+    int GetControlledZoneIndex(OutputFiles &outputFiles,
+                               std::string const &ZoneName) // Zone name to match into Controlled Zone structure
     {
 
         // FUNCTION INFORMATION:
@@ -1257,7 +1258,7 @@ namespace DataZoneEquipment {
         int ControlledZoneIndex; // Index into Controlled Zone structure
 
         if (!ZoneEquipInputsFilled) {
-            GetZoneEquipmentData1();
+            GetZoneEquipmentData1(outputFiles);
             ZoneEquipInputsFilled = true;
         }
 
@@ -1266,7 +1267,8 @@ namespace DataZoneEquipment {
         return ControlledZoneIndex;
     }
 
-    int FindControlledZoneIndexFromSystemNodeNumberForZone(int const TrialZoneNodeNum) // Node number to match into Controlled Zone structure
+    int FindControlledZoneIndexFromSystemNodeNumberForZone(OutputFiles &outputFiles,
+                                                           int const TrialZoneNodeNum) // Node number to match into Controlled Zone structure
     {
 
         // FUNCTION INFORMATION:
@@ -1289,7 +1291,7 @@ namespace DataZoneEquipment {
         FoundIt = false;
 
         if (!ZoneEquipInputsFilled) {
-            GetZoneEquipmentData1();
+            GetZoneEquipmentData1(outputFiles);
             ZoneEquipInputsFilled = true;
         }
         ControlledZoneIndex = 0;
@@ -1306,45 +1308,8 @@ namespace DataZoneEquipment {
         return ControlledZoneIndex;
     }
 
-    int GetSystemNodeNumberForZone(std::string const &ZoneName) // Zone name to match into Controlled Zone structure
-    {
-
-        // FUNCTION INFORMATION:
-        //       AUTHOR         Linda Lawrie
-        //       DATE WRITTEN   March 2008
-        //       MODIFIED       na
-        //       RE-ENGINEERED  na
-
-        // PURPOSE OF THIS FUNCTION:
-        // This function returns the system node number for the indicated
-        // zone.  Returns 0 if the Zone is not a controlled zone.
-
-        // Return value
-        int SystemZoneNodeNumber; // System node number for controlled zone
-
-        // FUNCTION LOCAL VARIABLE DECLARATIONS:
-        int ControlledZoneIndex;
-
-        if (!ZoneEquipInputsFilled) {
-            GetZoneEquipmentData1();
-            ZoneEquipInputsFilled = true;
-        }
-
-        ControlledZoneIndex = UtilityRoutines::FindItemInList(ZoneName, ZoneEquipConfig, &EquipConfiguration::ZoneName);
-        SystemZoneNodeNumber = 0; // default is not found
-        if (ControlledZoneIndex > 0) {
-            if (ZoneEquipConfig(ControlledZoneIndex).ActualZoneNum > 0) {
-                SystemZoneNodeNumber = ZoneEquipConfig(ControlledZoneIndex).ZoneNode;
-            }
-        }
-
-        return SystemZoneNodeNumber;
-    }
-
-    int GetReturnAirNodeForZone(std::string const &ZoneName,             // Zone name to match into Controlled Zone structure
-                                std::string const &NodeName,             // Return air node name to match (may be blank)
-                                std::string const &calledFromDescription // String identifying the calling function and object
-    )
+    int GetReturnAirNodeForZone(OutputFiles &outputFiles, std::string const &ZoneName, std::string const &NodeName,
+                                std::string const &calledFromDescription)
     {
 
         // FUNCTION INFORMATION:
@@ -1363,7 +1328,7 @@ namespace DataZoneEquipment {
         int ControlledZoneIndex;
 
         if (!ZoneEquipInputsFilled) {
-            GetZoneEquipmentData1();
+            GetZoneEquipmentData1(outputFiles);
             ZoneEquipInputsFilled = true;
         }
 
@@ -1396,9 +1361,7 @@ namespace DataZoneEquipment {
         return ReturnAirNodeNumber;
     }
 
-    int GetReturnNumForZone(std::string const &ZoneName, // Zone name to match into Controlled Zone structure
-                            std::string const &NodeName  // Return air node name to match (may be blank)
-    )
+    int GetReturnNumForZone(OutputFiles &outputFiles, std::string const &ZoneName, std::string const &NodeName)
     {
 
         // PURPOSE OF THIS FUNCTION:
@@ -1413,7 +1376,7 @@ namespace DataZoneEquipment {
         int ControlledZoneIndex;
 
         if (!ZoneEquipInputsFilled) {
-            GetZoneEquipmentData1();
+            GetZoneEquipmentData1(outputFiles);
             ZoneEquipInputsFilled = true;
         }
 

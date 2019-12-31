@@ -160,12 +160,8 @@ namespace HWBaseboardRadiator {
 
     // Functions
 
-    void SimHWBaseboard(std::string const &EquipName,
-                        int const ActualZoneNum,
-                        int const ControlledZoneNum,
-                        bool const FirstHVACIteration,
-                        Real64 &PowerMet,
-                        int &CompIndex)
+    void SimHWBaseboard(OutputFiles &outputFiles, std::string const &EquipName, int const ActualZoneNum,
+                        int const ControlledZoneNum, bool const FirstHVACIteration, Real64 &PowerMet, int &CompIndex)
     {
 
         // SUBROUTINE INFORMATION:
@@ -237,7 +233,8 @@ namespace HWBaseboardRadiator {
                 auto const SELECT_CASE_var(HWBaseboard(BaseboardNum).EquipType);
 
                 if (SELECT_CASE_var == TypeOf_Baseboard_Rad_Conv_Water) { // 'ZoneHVAC:Baseboard:RadiantConvective:Water'
-                    ControlCompOutput(HWBaseboard(BaseboardNum).EquipID,
+                    ControlCompOutput(outputFiles,
+                                      HWBaseboard(BaseboardNum).EquipID,
                                       cCMO_BBRadiator_Water,
                                       BaseboardNum,
                                       FirstHVACIteration,
@@ -255,7 +252,7 @@ namespace HWBaseboardRadiator {
                                       _,
                                       HWBaseboard(BaseboardNum).LoopNum,
                                       HWBaseboard(BaseboardNum).LoopSideNum,
-                                      HWBaseboard(BaseboardNum).BranchNum);
+                                      HWBaseboard(BaseboardNum).BranchNum, ObjexxFCL::Optional_int_const());
                 } else {
                     ShowSevereError("SimBaseboard: Errors in Baseboard=" + HWBaseboard(BaseboardNum).EquipID);
                     ShowContinueError("Invalid or unimplemented equipment type=" + TrimSigDigits(HWBaseboard(BaseboardNum).EquipType));

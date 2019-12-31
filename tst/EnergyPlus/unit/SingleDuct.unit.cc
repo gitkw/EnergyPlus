@@ -141,7 +141,7 @@ TEST_F(EnergyPlusFixture, VAVNoReheatTerminalUnitSchedule)
     bool ErrorsFound = false;
     HeatBalanceManager::GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
-    DataZoneEquipment::GetZoneEquipmentData1();
+    DataZoneEquipment::GetZoneEquipmentData1(outputFiles);
     ZoneAirLoopEquipmentManager::GetZoneAirLoopEquipment();
     SingleDuct::GetSysInput();
     EXPECT_TRUE(compare_err_stream(""));
@@ -312,7 +312,7 @@ TEST_F(EnergyPlusFixture, VAVReheatTerminalUnitSchedule)
     bool ErrorsFound = false;
     HeatBalanceManager::GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
-    DataZoneEquipment::GetZoneEquipmentData1();
+    DataZoneEquipment::GetZoneEquipmentData1(outputFiles);
     ZoneAirLoopEquipmentManager::GetZoneAirLoopEquipment();
     SingleDuct::GetSysInput();
     EXPECT_TRUE(compare_err_stream(""));
@@ -1254,7 +1254,8 @@ TEST_F(EnergyPlusFixture, SingleDuct_ZeroFloorAreaTest)
 
     // OutputProcessor::TimeValue.allocate(2);
 
-    ManageSimulation(); // run the design day over the warmup period (24 hrs, 25 days)
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    ManageSimulation(outputFiles); // run the design day over the warmup period (24 hrs, 25 days)
 
     // compare_err_stream( "" ); // just for debugging
 
@@ -2453,7 +2454,8 @@ TEST_F(EnergyPlusFixture, SingleDuct_VAVWaterCoilSizing)
 
     // OutputProcessor::TimeValue.allocate(2);
 
-    ManageSimulation(); // run the design days
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    ManageSimulation(outputFiles); // run the design days
 
     // size the reheat coil with no design zone heating load
     // DesZoneHeatLoad = 0 from simulating design days and forcing heating load = 0
@@ -2692,7 +2694,7 @@ TEST_F(EnergyPlusFixture, VAVReheatTerminal_SizeMinFrac)
     bool ErrorsFound = false;
     HeatBalanceManager::GetZoneData(ErrorsFound);
     ASSERT_FALSE(ErrorsFound);
-    DataZoneEquipment::GetZoneEquipmentData1();
+    DataZoneEquipment::GetZoneEquipmentData1(outputFiles);
     DataSizing::TermUnitFinalZoneSizing.allocate(1);
     DataSizing::TermUnitSizing.allocate(1);
     DataSizing::FinalZoneSizing.allocate(1);

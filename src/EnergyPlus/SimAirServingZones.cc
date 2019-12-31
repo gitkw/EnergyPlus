@@ -243,10 +243,7 @@ namespace SimAirServingZones {
         TestUniqueNodesNum = 0;
     }
 
-    void ManageAirLoops(bool const FirstHVACIteration, // TRUE if first full HVAC iteration in an HVAC timestep
-                        bool &SimAir,                  // TRUE means air loops must be (re)simulated
-                        bool &SimZoneEquipment         // TRUE means zone equipment must be (re) simulated
-    )
+    void ManageAirLoops(OutputFiles &outputFiles, bool const FirstHVACIteration, bool &SimAir, bool &SimZoneEquipment)
     {
 
         // SUBROUTINE INFORMATION
@@ -285,18 +282,18 @@ namespace SimAirServingZones {
         // FLOW:
 
         if (GetAirLoopInputFlag) { // First time subroutine has been entered
-            GetAirPathData();      // Get air loop descriptions from input file
+            GetAirPathData(outputFiles);      // Get air loop descriptions from input file
             GetAirLoopInputFlag = false;
         }
 
         // Initialize air loop related parameters
-        InitAirLoops(FirstHVACIteration);
+        InitAirLoops(outputFiles, FirstHVACIteration);
 
         // Call the AirLoop Simulation
         if (SysSizingCalc) {
             SizeAirLoops();
         } else if (!SysSizingCalc) {
-            SimAirLoops(FirstHVACIteration, SimZoneEquipment);
+            SimAirLoops(outputFiles, FirstHVACIteration, SimZoneEquipment);
         }
 
         // This flag could be used to resimulate only the air loops that needed additional iterations.
@@ -308,7 +305,7 @@ namespace SimAirServingZones {
     // Get Input Section of the Module
     //******************************************************************************
 
-    void GetAirPathData()
+    void GetAirPathData(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION
@@ -853,8 +850,9 @@ namespace SimAirServingZones {
                         OANum = GetOASystemNumber(CompNames(CompNum));
                         if (OANum > 0) {
                             NumOASysSimpControllers = GetOASysNumSimpControllers(OANum);
-                            PrimaryAirSystem(AirSysNum).NumOAHeatCoils = GetOASysNumHeatingCoils(OANum);
-                            PrimaryAirSystem(AirSysNum).NumOACoolCoils = GetOASysNumCoolingCoils(OANum);
+                            PrimaryAirSystem(AirSysNum).NumOAHeatCoils = GetOASysNumHeatingCoils(outputFiles,
+                                                                                                 OANum);
+                            PrimaryAirSystem(AirSysNum).NumOACoolCoils = GetOASysNumCoolingCoils(outputFiles, OANum);
                             PrimaryAirSystem(AirSysNum).NumOAHXs = GetOASysNumHXs(OANum);
                             OASysContListNum = GetOASysControllerListIndex(OANum);
                             OAMixNum = FindOAMixerMatchForOASystem(OANum);
@@ -1303,8 +1301,9 @@ namespace SimAirServingZones {
                             PrimaryAirSystem(AirSysNum).Branch(BranchNum).Comp(CompNum).CompType_Num = CoilUserDefined;
                         } else if (componentType == "AIRLOOPHVAC:UNITARYSYSTEM") {
                             PrimaryAirSystem(AirSysNum).Branch(BranchNum).Comp(CompNum).CompType_Num = UnitarySystemModel;
-                            UnitarySystems::UnitarySys thisSys;
+                            UnitarySystems::UnitarySys thisSys{outputFiles};
                             PrimaryAirSystem(AirSysNum).Branch(BranchNum).Comp(CompNum).compPointer = thisSys.factory(
+                                outputFiles,
                                 DataHVACGlobals::UnitarySys_AnyCoilType, PrimaryAirSystem(AirSysNum).Branch(BranchNum).Comp(CompNum).Name, false, 0);
                         } else if (componentType == "AIRLOOPHVAC:UNITARY:FURNACE:HEATONLY") {
                             PrimaryAirSystem(AirSysNum).Branch(BranchNum).Comp(CompNum).CompType_Num = Furnace_UnitarySys_HeatOnly;
@@ -1449,7 +1448,7 @@ namespace SimAirServingZones {
         numAirLoopDOAS = inputProcessor->getNumObjectsFound("AirLoopHVAC:DedicatedOutdoorAirSystem");
         if (numAirLoopDOAS > 0) {
             if (AirLoopHVACDOAS::GetInputOnceFlag) {
-                AirLoopHVACDOAS::getAirLoopHVACDOASInput();
+                AirLoopHVACDOAS::getAirLoopHVACDOASInput(outputFiles);
                 AirLoopHVACDOAS::GetInputOnceFlag = false;
             }
         }
@@ -1461,7 +1460,7 @@ namespace SimAirServingZones {
     // Beginning Initialization Section of the Module
     //******************************************************************************
 
-    void InitAirLoops(bool const FirstHVACIteration) // TRUE if first full HVAC iteration in an HVAC timestep
+    void InitAirLoops(OutputFiles &outputFiles, bool const FirstHVACIteration) // TRUE if first full HVAC iteration in an HVAC timestep
     {
 
         // SUBROUTINE INFORMATION:
@@ -2137,7 +2136,7 @@ namespace SimAirServingZones {
                             std::string CompName = PrimaryAirSystem(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name;
                             bool CoolingCoilExists = false;
                             bool HeatingCoilExists = false;
-                            UnitarySystems::UnitarySys::getUnitarySysHeatCoolCoil(CompName, CoolingCoilExists, HeatingCoilExists, 0);
+                            UnitarySystems::UnitarySys::getUnitarySysHeatCoolCoil(outputFiles, CompName, CoolingCoilExists, HeatingCoilExists, 0);
                             if (HeatingCoilExists) FoundCentralHeatCoil = true;
                         }
                     } // end of component loop
@@ -2161,7 +2160,7 @@ namespace SimAirServingZones {
                             std::string CompName = PrimaryAirSystem(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name;
                             bool CoolingCoilExists = false;
                             bool HeatingCoilExists = false;
-                            UnitarySystems::UnitarySys::getUnitarySysHeatCoolCoil(CompName, CoolingCoilExists, HeatingCoilExists, 0);
+                            UnitarySystems::UnitarySys::getUnitarySysHeatCoolCoil(outputFiles, CompName, CoolingCoilExists, HeatingCoilExists, 0);
                             if (CoolingCoilExists) FoundCentralCoolCoil = true;
                         }
                     } // end of component loop
@@ -2459,7 +2458,7 @@ namespace SimAirServingZones {
         }
     }
 
-    void SimAirLoops(bool const FirstHVACIteration, bool &SimZoneEquipment)
+    void SimAirLoops(OutputFiles &outputFiles, bool const FirstHVACIteration, bool &SimZoneEquipment)
     {
 
         // SUBROUTINE INFORMATION
@@ -2595,7 +2594,7 @@ namespace SimAirServingZones {
                 AirLoopControlInfo(AirLoopNum).AirLoopPass = AirLoopPass; // save for use without passing as argument
 
                 // Simulate controllers on air loop with current air mass flow rates
-                SimAirLoop(FirstHVACIteration, AirLoopNum, AirLoopPass, AirLoopIterMax, AirLoopIterTot, AirLoopNumCalls);
+                SimAirLoop(outputFiles, FirstHVACIteration, AirLoopNum, AirLoopPass, AirLoopIterMax, AirLoopIterTot, AirLoopNumCalls);
 
                 // Update tracker for maximum number of iterations needed by any controller on all air loops
                 IterMax = max(IterMax, AirLoopIterMax);
@@ -2668,7 +2667,8 @@ namespace SimAirServingZones {
                         AirLoopControlInfo(AirLoopNum).AirLoopPass = AirLoopPass; // save for use without passing as argument
 
                         // Simulate controllers on air loop with current air mass flow rates
-                        SimAirLoop(FirstHVACIteration, AirLoopNum, AirLoopPass, AirLoopIterMax, AirLoopIterTot, AirLoopNumCalls);
+                        SimAirLoop(outputFiles, FirstHVACIteration, AirLoopNum, AirLoopPass, AirLoopIterMax, AirLoopIterTot,
+                                   AirLoopNumCalls);
 
                         // Update tracker for maximum number of iterations needed by any controller on all air loops
                         IterMax = max(IterMax, AirLoopIterMax);
@@ -2709,8 +2709,8 @@ namespace SimAirServingZones {
         CurSysNum = 0;
     }
 
-    void SimAirLoop(
-        bool const FirstHVACIteration, int const AirLoopNum, int const AirLoopPass, int &AirLoopIterMax, int &AirLoopIterTot, int &AirLoopNumCalls)
+    void SimAirLoop(OutputFiles &outputFiles, bool const FirstHVACIteration, int const AirLoopNum, int const AirLoopPass, int &AirLoopIterMax,
+                    int &AirLoopIterTot, int &AirLoopNumCalls)
     {
 
         // SUBROUTINE INFORMATION
@@ -2800,7 +2800,8 @@ namespace SimAirServingZones {
 
         if (!DoWarmRestartFlag) {
             // Solve controllers with cold start using default initial values
-            SolveAirLoopControllers(FirstHVACIteration, AirLoopNum, AirLoopConvergedFlag, IterMax, IterTot, NumCalls);
+            SolveAirLoopControllers(outputFiles, FirstHVACIteration, AirLoopNum, AirLoopConvergedFlag, IterMax,
+                                    IterTot, NumCalls);
 
             // Update air loop trackers
             WarmRestartStatus = iControllerWarmRestartNone;
@@ -2809,7 +2810,8 @@ namespace SimAirServingZones {
             AirLoopIterTot += IterTot;
         } else {
             // First try with speculative warm restart using previous solution
-            ReSolveAirLoopControllers(FirstHVACIteration, AirLoopNum, AirLoopConvergedFlag, IterMax, IterTot, NumCalls);
+            ReSolveAirLoopControllers(outputFiles, FirstHVACIteration, AirLoopNum, AirLoopConvergedFlag, IterMax,
+                                      IterTot, NumCalls);
 
             // Update air loop trackers
             WarmRestartStatus = iControllerWarmRestartSuccess;
@@ -2819,7 +2821,8 @@ namespace SimAirServingZones {
 
             // Retry with cold start using default initial values if speculative warm restart did not work
             if (!AirLoopConvergedFlag) {
-                SolveAirLoopControllers(FirstHVACIteration, AirLoopNum, AirLoopConvergedFlag, IterMax, IterTot, NumCalls);
+                SolveAirLoopControllers(outputFiles, FirstHVACIteration, AirLoopNum, AirLoopConvergedFlag, IterMax,
+                                        IterTot, NumCalls);
 
                 // Update air loop trackers
                 WarmRestartStatus = iControllerWarmRestartFail;
@@ -2853,8 +2856,8 @@ namespace SimAirServingZones {
         AirLoopControlInfo(AirLoopNum).ConvergedFlag = AirLoopConvergedFlag;
     }
 
-    void SolveAirLoopControllers(
-        bool const FirstHVACIteration, int const AirLoopNum, bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls)
+    void SolveAirLoopControllers(OutputFiles &outputFiles, bool const FirstHVACIteration, int const AirLoopNum,
+                                 bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls)
     {
 
         // SUBROUTINE INFORMATION
@@ -2946,7 +2949,9 @@ namespace SimAirServingZones {
                     AirLoopControlNum;
             }
             // When using controllers, size air loop coils so ControllerProps (e.g., Min/Max Actuated) can be set
-            if (PrimaryAirSystem(AirLoopNum).NumControllers > 0) SimAirLoopComponents(AirLoopNum, FirstHVACIteration);
+            if (PrimaryAirSystem(AirLoopNum).NumControllers > 0)
+                SimAirLoopComponents(outputFiles, AirLoopNum,
+                                     FirstHVACIteration);
             PrimaryAirSystem(AirLoopNum).SizeAirloopCoil = false;
         }
 
@@ -2972,7 +2977,7 @@ namespace SimAirServingZones {
 
         // Evaluate air loop components with new actuated variables
         ++NumCalls;
-        SimAirLoopComponents(AirLoopNum, FirstHVACIteration);
+        SimAirLoopComponents(outputFiles, AirLoopNum, FirstHVACIteration);
         IsUpToDateFlag = true;
 
         // Loop over the air sys controllers until convergence or MaxIter iterations
@@ -3043,7 +3048,7 @@ namespace SimAirServingZones {
                     // this call to SimAirLoopComponents will simulate the OA system and set the PrimaryAirSystem( AirLoopNum ).ControlConverged(
                     // AirLoopControlNum ) flag for controllers of water coils in the OA system for controllers not in the OA system, this flag is set
                     // above in this function
-                    SimAirLoopComponents(AirLoopNum, FirstHVACIteration);
+                    SimAirLoopComponents(outputFiles, AirLoopNum, FirstHVACIteration);
                     // pass convergence flag from OA system water coils (i.e., SolveWaterCoilController) back to this loop
                     // for future reference, the PrimaryAirSystem().ControlConverged flag is set while managing OA system water coils.
                     // If convergence is not achieved with OA system water coils, suspect how this flag is passed back here or why OA system coils do
@@ -3066,7 +3071,7 @@ namespace SimAirServingZones {
         // more to ensure that they are simulated with the latest values.
         if (!IsUpToDateFlag || !AirLoopConvergedFlag) {
             ++NumCalls;
-            SimAirLoopComponents(AirLoopNum, FirstHVACIteration);
+            SimAirLoopComponents(outputFiles, AirLoopNum, FirstHVACIteration);
             IsUpToDateFlag = true;
         }
 
@@ -3198,7 +3203,9 @@ namespace SimAirServingZones {
 
         // Evaluate water coils with new actuated variables
         if (HXAssistedWaterCoil) {
-            SimHXAssistedCoolingCoil(CompName, FirstHVACIteration, CoilOn, 0.0, CompIndex, ContFanCycCoil);
+            SimHXAssistedCoolingCoil(outputFiles, CompName, FirstHVACIteration, CoilOn, 0.0, CompIndex,
+                                     ContFanCycCoil, ObjexxFCL::Optional_bool_const(), Optional<const Real64>(),
+                                     ObjexxFCL::Optional_bool_const(), Optional<Real64>());
         } else {
             SimulateWaterCoilComponents(CompName, FirstHVACIteration, CompIndex);
         }
@@ -3268,7 +3275,9 @@ namespace SimAirServingZones {
 
                 // Re-evaluate air loop components with new actuated variables
                 if (HXAssistedWaterCoil) {
-                    SimHXAssistedCoolingCoil(CompName, FirstHVACIteration, CoilOn, 0.0, CompIndex, ContFanCycCoil);
+                    SimHXAssistedCoolingCoil(outputFiles, CompName, FirstHVACIteration, CoilOn, 0.0, CompIndex,
+                                             ContFanCycCoil, ObjexxFCL::Optional_bool_const(), Optional<const Real64>(),
+                                             ObjexxFCL::Optional_bool_const(), Optional<Real64>());
                 } else {
                     SimulateWaterCoilComponents(CompName, FirstHVACIteration, CompIndex);
                 }
@@ -3300,8 +3309,8 @@ namespace SimAirServingZones {
         }
     }
 
-    void ReSolveAirLoopControllers(
-        bool const FirstHVACIteration, int const AirLoopNum, bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls)
+    void ReSolveAirLoopControllers(OutputFiles &outputFiles, bool const FirstHVACIteration, int const AirLoopNum,
+                                   bool &AirLoopConvergedFlag, int &IterMax, int &IterTot, int &NumCalls)
     {
 
         // SUBROUTINE INFORMATION
@@ -3385,7 +3394,7 @@ namespace SimAirServingZones {
 
         // Evaluate air loop components with new actuated variables
         ++NumCalls;
-        SimAirLoopComponents(AirLoopNum, FirstHVACIteration);
+        SimAirLoopComponents(outputFiles, AirLoopNum, FirstHVACIteration);
         IsUpToDateFlag = true;
 
         // Check that all active controllers are still convergence
@@ -3415,9 +3424,7 @@ namespace SimAirServingZones {
         } // end of controller loop
     }
 
-    void SimAirLoopComponents(int const AirLoopNum,         // Index of the air loop being currently simulated
-                              bool const FirstHVACIteration // TRUE if first full HVAC iteration in an HVAC timestep
-    )
+    void SimAirLoopComponents(OutputFiles &outputFiles, int const AirLoopNum, bool const FirstHVACIteration)
     {
         // SUBROUTINE INFORMATION
         //             AUTHOR:  Dimitri Curtil (LBNL)
@@ -3473,7 +3480,8 @@ namespace SimAirServingZones {
                 CompType_Num = PrimaryAirSystem(AirLoopNum).Branch(BranchNum).Comp(CompNum).CompType_Num;
 
                 // Simulate each component on PrimaryAirSystem(AirLoopNum)%Branch(BranchNum)%Name
-                SimAirLoopComponent(PrimaryAirSystem(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name,
+                SimAirLoopComponent(outputFiles,
+                                    PrimaryAirSystem(AirLoopNum).Branch(BranchNum).Comp(CompNum).Name,
                                     CompType_Num,
                                     FirstHVACIteration,
                                     AirLoopNum,
@@ -3490,7 +3498,8 @@ namespace SimAirServingZones {
         CurDuctType = 0;
     }
 
-    void SimAirLoopComponent(std::string const &CompName,            // the component Name
+    void SimAirLoopComponent(OutputFiles &outputFiles,
+                             std::string const &CompName,            // the component Name
                              int const CompType_Num,                 // numeric equivalent for component type
                              bool const FirstHVACIteration,          // TRUE if first full HVAC iteration in an HVAC timestep
                              int const AirLoopNum,                   // Primary air loop number
@@ -3558,7 +3567,7 @@ namespace SimAirServingZones {
             auto const SELECT_CASE_var(CompType_Num);
 
             if (SELECT_CASE_var == OAMixer_Num) { // 'OUTSIDE AIR SYSTEM'
-                ManageOutsideAirSystem(CompName, FirstHVACIteration, AirLoopNum, CompIndex);
+                ManageOutsideAirSystem(outputFiles, CompName, FirstHVACIteration, AirLoopNum, CompIndex);
 
                 // Fan Types for the air sys simulation
             } else if (SELECT_CASE_var == Fan_Simple_CV) { // 'Fan:ConstantVolume'
@@ -3585,7 +3594,8 @@ namespace SimAirServingZones {
                 //  CASE(DXCoil_CoolingHXAsst)  ! 'CoilSystem:Cooling:DX:HeatExchangerAssisted'
                 //    CALL SimHXAssistedCoolingCoil(CompName,FirstHVACIteration,CoilOn,0.0,CompIndex,ContFanCycCoil)
             } else if (SELECT_CASE_var == WaterCoil_CoolingHXAsst) { // 'CoilSystem:Cooling:Water:HeatExchangerAssisted'
-                SimHXAssistedCoolingCoil(CompName, FirstHVACIteration, CoilOn, constant_zero, CompIndex, ContFanCycCoil, _, _, _, QActual);
+                SimHXAssistedCoolingCoil(outputFiles, CompName, FirstHVACIteration, CoilOn, constant_zero,
+                                         CompIndex, ContFanCycCoil, _, _, _, QActual);
                 if (QActual > 0.0) CoolingActive = true; // determine if coil is ON
 
             } else if (SELECT_CASE_var == WaterCoil_SimpleHeat) { // 'Coil:Heating:Water'
@@ -3619,31 +3629,32 @@ namespace SimAirServingZones {
                 if (QActual > 0.0) HeatingActive = true; // determine if coil is ON
 
             } else if (SELECT_CASE_var == DXSystem) { // CoilSystem:Cooling:DX  old 'AirLoopHVAC:UnitaryCoolOnly'
-                SimDXCoolingSystem(CompName, FirstHVACIteration, AirLoopNum, CompIndex, _, _, QActual);
+                SimDXCoolingSystem(outputFiles, CompName, FirstHVACIteration, AirLoopNum, CompIndex, _, _, QActual);
                 if (QActual > 0.0) CoolingActive = true; // determine if coil is ON
 
             } else if (SELECT_CASE_var == DXHeatPumpSystem) { // 'CoilSystem:Heating:DX'
-                SimDXHeatPumpSystem(CompName, FirstHVACIteration, AirLoopNum, CompIndex, _, _, QActual);
+                SimDXHeatPumpSystem(outputFiles, CompName, FirstHVACIteration, AirLoopNum, CompIndex, _, _,
+                                    QActual);
                 if (QActual > 0.0) HeatingActive = true; // determine if coil is ON
 
             } else if (SELECT_CASE_var == CoilUserDefined) { // Coil:UserDefined
                 SimCoilUserDefined(CompName, CompIndex, AirLoopNum, HeatingActive, CoolingActive);
 
             } else if (SELECT_CASE_var == UnitarySystemModel) { // 'AirLoopHVAC:UnitarySystem'
-                CompPointer->simulate(
+                CompPointer->simulate(outputFiles,
                     CompName, FirstHVACIteration, AirLoopNum, CompIndex, HeatingActive, CoolingActive, OAUnitNum, OAUCoilOutTemp, ZoneEquipFlag);
 
             } else if (SELECT_CASE_var == Furnace_UnitarySys_HeatOnly || SELECT_CASE_var == Furnace_UnitarySys_HeatCool) {
                 // 'AirLoopHVAC:Unitary:Furnace:HeatOnly', 'AirLoopHVAC:Unitary:Furnace:HeatCool',
                 // 'AirLoopHVAC:UnitaryHeatOnly', 'AirLoopHVAC:UnitaryHeatCool'
                 // 'AirLoopHVAC:UnitaryHeatPump:AirToAir', 'AirLoopHVAC:UnitaryHeatPump:WaterToAir'
-                SimFurnace(CompName, FirstHVACIteration, AirLoopNum, CompIndex);
+                SimFurnace(outputFiles, CompName, FirstHVACIteration, AirLoopNum, CompIndex);
 
             } else if (SELECT_CASE_var == UnitarySystem_BypassVAVSys) { // 'AirLoopHVAC:UnitaryHeatCool:VAVChangeoverBypass'
-                SimUnitaryBypassVAV(CompName, FirstHVACIteration, AirLoopNum, CompIndex);
+                SimUnitaryBypassVAV(outputFiles, CompName, FirstHVACIteration, AirLoopNum, CompIndex);
 
             } else if (SELECT_CASE_var == UnitarySystem_MSHeatPump) { // 'AirLoopHVAC:UnitaryHeatPump:AirToAir:Multispeed'
-                SimMSHeatPump(CompName, FirstHVACIteration, AirLoopNum, CompIndex);
+                SimMSHeatPump(outputFiles, CompName, FirstHVACIteration, AirLoopNum, CompIndex);
 
                 // Humidifier Types for the air system simulation
             } else if (SELECT_CASE_var == Humidifier) { // 'Humidifier:Steam:Electric' and 'Humidifier:Steam:Gas'
@@ -7616,7 +7627,7 @@ namespace SimAirServingZones {
         // components list in primary air systems.
 
         if (GetAirLoopInputFlag) { // First time subroutine has been entered
-            GetAirPathData();      // Get air loop descriptions from input file
+            GetAirPathData(outputFiles);      // Get air loop descriptions from input file
             GetAirLoopInputFlag = false;
         }
 
@@ -7648,7 +7659,7 @@ namespace SimAirServingZones {
         using MixedAir::GetOutsideAirSysInputs;
 
         if (GetOASysInputFlag) {
-            GetOutsideAirSysInputs();
+            GetOutsideAirSysInputs(outputFiles);
             GetOASysInputFlag = false;
         }
         int NumOASys = GetNumOASystems();

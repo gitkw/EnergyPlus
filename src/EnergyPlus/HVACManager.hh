@@ -55,7 +55,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
-
+    class OutputFiles;
 namespace HVACManager {
 
     // Data
@@ -73,11 +73,12 @@ namespace HVACManager {
     // Functions
     void clear_state();
 
-    void ManageHVAC();
+    void ManageHVAC(OutputFiles &outputFiles);
 
-    void SimHVAC();
+    void SimHVAC(EnergyPlus::OutputFiles &outputFiles);
 
-    void SimSelectedEquipment(bool &SimAirLoops,         // True when the air loops need to be (re)simulated
+    void SimSelectedEquipment(OutputFiles &outputFiles,
+                              bool &SimAirLoops,         // True when the air loops need to be (re)simulated
                               bool &SimZoneEquipment,    // True when zone equipment components need to be (re)simulated
                               bool &SimNonZoneEquipment, // True when non-zone equipment components need to be (re)simulated
                               bool &SimPlantLoops,       // True when the main plant loops need to be (re)simulated

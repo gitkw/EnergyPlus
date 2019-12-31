@@ -154,7 +154,7 @@ namespace HeatBalanceAirManager {
         UniqueInfiltrationNames.clear();
     }
 
-    void ManageAirHeatBalance()
+    void ManageAirHeatBalance(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -207,7 +207,7 @@ namespace HeatBalanceAirManager {
 
         // Solve the zone heat balance 'Detailed' solution
         // Call the air surface heat balances
-        CalcHeatBalanceAir();
+        CalcHeatBalanceAir(outputFiles);
 
         ReportZoneMeanAirTemp();
     }
@@ -4381,7 +4381,7 @@ namespace HeatBalanceAirManager {
     // Begin Algorithm Section of the Module
     //******************************************************************************
 
-    void CalcHeatBalanceAir()
+    void CalcHeatBalanceAir(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4417,7 +4417,7 @@ namespace HeatBalanceAirManager {
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         // na
 
-        ManageHVAC();
+        ManageHVAC(outputFiles);
 
         // Do Final Temperature Calculations for Heat Balance before next Time step
         SumHmAW = 0.0;

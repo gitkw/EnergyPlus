@@ -1109,7 +1109,7 @@ TEST_F(EnergyPlusFixture, AutosizeLowTempRadiantVariableFlowTest)
     EXPECT_FALSE(ErrorsFound);
     EXPECT_EQ("WEST ZONE", Zone(1).Name);
 
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
 

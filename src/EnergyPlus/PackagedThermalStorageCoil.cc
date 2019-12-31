@@ -169,12 +169,9 @@ namespace PackagedThermalStorageCoil {
 
     // Functions
 
-    void SimTESCoil(std::string const &CompName, // name of the fan coil unit
-                    int &CompIndex,
-                    int const FanOpMode, // allows parent object to control fan mode
+    void SimTESCoil(OutputFiles &outputFiles, std::string const &CompName, int &CompIndex, int const FanOpMode,
                     int &TESOpMode,
-                    Optional<Real64 const> PartLoadRatio // part load ratio (for single speed cycling unit)
-    )
+                    Optional<Real64 const> PartLoadRatio)
     {
 
         // SUBROUTINE INFORMATION:
@@ -193,7 +190,7 @@ namespace PackagedThermalStorageCoil {
         int TESCoilNum;
 
         if (GetTESInputFlag) {
-            GetTESCoilInput();
+            GetTESCoilInput(outputFiles);
             GetTESInputFlag = false;
         }
 
@@ -241,7 +238,7 @@ namespace PackagedThermalStorageCoil {
         }
     }
 
-    void GetTESCoilInput()
+    void GetTESCoilInput(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -413,7 +410,8 @@ namespace PackagedThermalStorageCoil {
             TESCoil(item).StorageAmbientNodeNum = GetOnlySingleNode(
                 cAlphaArgs(7), ErrorsFound, cCurrentModuleObject, cAlphaArgs(1), NodeType_Air, NodeConnectionType_Sensor, 1, ObjectIsNotParent);
 
-            ZoneIndexTrial = FindControlledZoneIndexFromSystemNodeNumberForZone(TESCoil(item).StorageAmbientNodeNum);
+            ZoneIndexTrial = FindControlledZoneIndexFromSystemNodeNumberForZone(outputFiles,
+                                                                                TESCoil(item).StorageAmbientNodeNum);
             if (ZoneIndexTrial > 0) { // tank is inside a zone so setup internal gains
                 SetupZoneInternalGain(ZoneIndexTrial,
                                       "Coil:Cooling:DX:SingleSpeed:ThermalStorage",
@@ -4074,24 +4072,12 @@ namespace PackagedThermalStorageCoil {
         }
     }
 
-    void ControlTESIceStorageTankCoil(std::string const &CoilName,      // child object coil name
-                                      int CoilIndex,                    // child object coil index
-                                      std::string SystemType,           // parent object system type
-                                      int const FanOpMode,              // parent object fan operating mode
-                                      Real64 const DesiredOutletTemp,   // desired outlet temperature [C]
-                                      Real64 const DesiredOutletHumRat, // desired outlet humidity ratio [kg/kg]
-                                      Real64 &PartLoadFrac, // value based on coil operation, if possible, as PLR required to meet T or w set point
-                                      int &TESOpMode,       // value determined in InitTESCoil and passed back to parent for use in iteration routines
-                                      int &ControlType,     // parent object dehumidification control type (e.g., None, Multimode, CoolReheat)
-                                      int &SensPLRIter,     // iteration number of Sensible PLR Iteration warning message
-                                      int &SensPLRIterIndex, // index to Sensible PLR Iteration warning message
-                                      int &SensPLRFail,      // iteration number of Sensible PLR Iteration fail warning message
-                                      int &SensPLRFailIndex, // index to Sensible PLR Iteration fail warning message
-                                      int &LatPLRIter,       // iteration number of Latent PLR Iteration warning message
-                                      int &LatPLRIterIndex,  // index to Latent PLR Iteration warning message
-                                      int &LatPLRFail,       // iteration number of Latent PLR Iteration fail warning message
-                                      int &LatPLRFailIndex   // index to Latent PLR Iteration fail warning message
-    )
+    void ControlTESIceStorageTankCoil(OutputFiles &outputFiles, std::string const &CoilName, int CoilIndex,
+                                      std::string SystemType, int const FanOpMode, Real64 const DesiredOutletTemp,
+                                      Real64 const DesiredOutletHumRat, Real64 &PartLoadFrac, int &TESOpMode,
+                                      int &ControlType, int &SensPLRIter, int &SensPLRIterIndex, int &SensPLRFail,
+                                      int &SensPLRFailIndex, int &LatPLRIter, int &LatPLRIterIndex, int &LatPLRFail,
+                                      int &LatPLRFailIndex)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4146,20 +4132,20 @@ namespace PackagedThermalStorageCoil {
         OutletNode = TESCoil(CoilIndex).EvapAirOutletNodeNum;
 
         // First get the control mode that the child coil is in
-        SimTESCoil(CoilName, CoilIndex, FanOpMode, TESOpMode, PartLoadFrac);
+        SimTESCoil(outputFiles, CoilName, CoilIndex, FanOpMode, TESOpMode, PartLoadFrac);
         if (TESOpMode == OffMode || TESOpMode == ChargeOnlyMode) { // cannot cool
             PartLoadFrac = 0.0;
         } else {
             // Get no load result
             PartLoadFrac = 0.0;
-            SimTESCoil(CoilName, CoilIndex, FanOpMode, TESOpMode, PartLoadFrac);
+            SimTESCoil(outputFiles, CoilName, CoilIndex, FanOpMode, TESOpMode, PartLoadFrac);
             NoOutput = Node(InletNode).MassFlowRate *
                        (PsyHFnTdbW(Node(OutletNode).Temp, Node(OutletNode).HumRat) - PsyHFnTdbW(Node(InletNode).Temp, Node(OutletNode).HumRat));
             NoLoadHumRatOut = Node(OutletNode).HumRat;
 
             // Get full load result
             PartLoadFrac = 1.0;
-            SimTESCoil(CoilName, CoilIndex, FanOpMode, TESOpMode, PartLoadFrac);
+            SimTESCoil(outputFiles, CoilName, CoilIndex, FanOpMode, TESOpMode, PartLoadFrac);
             FullOutput = Node(InletNode).MassFlowRate *
                          (PsyHFnTdbW(Node(OutletNode).Temp, Node(OutletNode).HumRat) - PsyHFnTdbW(Node(InletNode).Temp, Node(OutletNode).HumRat));
             FullLoadHumRatOut = Node(OutletNode).HumRat;
@@ -4897,7 +4883,8 @@ namespace PackagedThermalStorageCoil {
         TESCoil(TESCoilNum).EvapCondPumpElecConsumption = TESCoil(TESCoilNum).EvapCondPumpElecPower * TimeStepSys * SecInHour;
     }
 
-    void GetTESCoilIndex(std::string const &CoilName, int &CoilIndex, bool &ErrorsFound, Optional_string_const CurrentModuleObject)
+    void GetTESCoilIndex(OutputFiles &outputFiles, std::string const &CoilName, int &CoilIndex, bool &ErrorsFound,
+                         Optional_string_const CurrentModuleObject)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4912,7 +4899,7 @@ namespace PackagedThermalStorageCoil {
 
         // Obtains and allocates TESCoil related parameters from input file
         if (GetTESInputFlag) { // First time subroutine has been called, get input data
-            GetTESCoilInput();
+            GetTESCoilInput(outputFiles);
             GetTESInputFlag = false; // Set logic flag to disallow getting the input data on future calls to this subroutine
         }
 
@@ -4932,7 +4919,9 @@ namespace PackagedThermalStorageCoil {
         }
     }
 
-    void GetTESCoilAirInletNode(std::string const &CoilName, int &CoilAirInletNode, bool &ErrorsFound, std::string const &CurrentModuleObject)
+    void GetTESCoilAirInletNode(OutputFiles &outputFiles, std::string const &CoilName, int &CoilAirInletNode,
+                                bool &ErrorsFound,
+                                std::string const &CurrentModuleObject)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4950,7 +4939,7 @@ namespace PackagedThermalStorageCoil {
 
         // Obtains and allocates TESCoil related parameters from input file
         if (GetTESInputFlag) { // First time subroutine has been called, get input data
-            GetTESCoilInput();
+            GetTESCoilInput(outputFiles);
             GetTESInputFlag = false; // Set logic flag to disallow getting the input data on future calls to this subroutine
         }
 
@@ -4969,7 +4958,8 @@ namespace PackagedThermalStorageCoil {
         }
     }
 
-    void GetTESCoilAirOutletNode(std::string const &CoilName, int &CoilAirOutletNode, bool &ErrorsFound, std::string const &CurrentModuleObject)
+    void GetTESCoilAirOutletNode(OutputFiles &outputFiles, std::string const &CoilName, int &CoilAirOutletNode,
+                                 bool &ErrorsFound, std::string const &CurrentModuleObject)
     {
 
         // SUBROUTINE INFORMATION:
@@ -4987,7 +4977,7 @@ namespace PackagedThermalStorageCoil {
 
         // Obtains and allocates TESCoil related parameters from input file
         if (GetTESInputFlag) { // First time subroutine has been called, get input data
-            GetTESCoilInput();
+            GetTESCoilInput(outputFiles);
             GetTESInputFlag = false; // Set logic flag to disallow getting the input data on future calls to this subroutine
         }
 
@@ -5006,7 +4996,8 @@ namespace PackagedThermalStorageCoil {
         }
     }
 
-    void GetTESCoilCoolingCapacity(std::string const &CoilName, Real64 &CoilCoolCapacity, bool &ErrorsFound, std::string const &CurrentModuleObject)
+    void GetTESCoilCoolingCapacity(OutputFiles &outputFiles, std::string const &CoilName, Real64 &CoilCoolCapacity,
+                                   bool &ErrorsFound, std::string const &CurrentModuleObject)
     {
 
         // SUBROUTINE INFORMATION:
@@ -5024,7 +5015,7 @@ namespace PackagedThermalStorageCoil {
 
         // Obtains and allocates TESCoil related parameters from input file
         if (GetTESInputFlag) { // First time subroutine has been called, get input data
-            GetTESCoilInput();
+            GetTESCoilInput(outputFiles);
             GetTESInputFlag = false; // Set logic flag to disallow getting the input data on future calls to this subroutine
         }
 
@@ -5051,7 +5042,8 @@ namespace PackagedThermalStorageCoil {
         }
     }
 
-    void GetTESCoilCoolingAirFlowRate(std::string const &CoilName, Real64 &CoilCoolAirFlow, bool &ErrorsFound, std::string const &CurrentModuleObject)
+    void GetTESCoilCoolingAirFlowRate(OutputFiles &outputFiles, std::string const &CoilName, Real64 &CoilCoolAirFlow,
+                                      bool &ErrorsFound, std::string const &CurrentModuleObject)
     {
 
         // SUBROUTINE INFORMATION:
@@ -5069,7 +5061,7 @@ namespace PackagedThermalStorageCoil {
 
         // Obtains and allocates TESCoil related parameters from input file
         if (GetTESInputFlag) { // First time subroutine has been called, get input data
-            GetTESCoilInput();
+            GetTESCoilInput(outputFiles);
             GetTESInputFlag = false; // Set logic flag to disallow getting the input data on future calls to this subroutine
         }
 

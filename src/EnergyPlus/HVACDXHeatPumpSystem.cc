@@ -145,14 +145,10 @@ namespace HVACDXHeatPumpSystem {
         DXHeatPumpSystem.deallocate();
     }
 
-    void SimDXHeatPumpSystem(std::string const &DXHeatPumpSystemName, // Name of DXSystem:Airloop object
-                             bool const FirstHVACIteration,           // True when first HVAC iteration
-                             int const AirLoopNum,                    // Primary air loop number
-                             int &CompIndex,                          // Index to CoilSystem:Heating:DX object
-                             Optional_int_const OAUnitNum,            // If the system is an equipment of OutdoorAirUnit
-                             Optional<Real64 const> OAUCoilOutTemp,   // the coil inlet temperature of OutdoorAirUnit
-                             Optional<Real64> QTotOut                 // the total cooling output of unit
-    )
+    void SimDXHeatPumpSystem(OutputFiles &outputFiles, std::string const &DXHeatPumpSystemName,
+                             bool const FirstHVACIteration,
+                             int const AirLoopNum, int &CompIndex, Optional_int_const OAUnitNum,
+                             Optional<Real64 const> OAUCoilOutTemp, Optional<Real64> QTotOut)
     {
 
         // SUBROUTINE INFORMATION:
@@ -223,7 +219,7 @@ namespace HVACDXHeatPumpSystem {
 
         // Call the series of components that simulate a DX Heating System
         // Control the DX Heating System
-        ControlDXHeatingSystem(DXSystemNum, FirstHVACIteration);
+        ControlDXHeatingSystem(outputFiles, DXSystemNum, FirstHVACIteration);
 
         // simulate DX Heating System
         CompName = DXHeatPumpSystem(DXSystemNum).HeatPumpCoilName;
@@ -233,12 +229,13 @@ namespace HVACDXHeatPumpSystem {
 
             if (SELECT_CASE_var == CoilDX_HeatingEmpirical) { // COIL:DX:COOLINGBYPASSFACTOREMPIRICAL
 
-                SimDXCoil(CompName,
+                SimDXCoil(outputFiles, CompName,
                           On,
                           FirstHVACIteration,
                           DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex,
                           DXHeatPumpSystem(DXSystemNum).FanOpMode,
-                          DXHeatPumpSystem(DXSystemNum).PartLoadFrac);
+                          DXHeatPumpSystem(DXSystemNum).PartLoadFrac, Optional<const Real64>(),
+                          Optional<const Real64>(), Optional<const Real64>(), Optional<const Real64>());
 
             } else if (SELECT_CASE_var == Coil_HeatingAirToAirVariableSpeed) { // Coil:Heating:DX:VariableSpeed
                 SimVariableSpeedCoils(CompName,
@@ -571,9 +568,7 @@ namespace HVACDXHeatPumpSystem {
     // Beginning of Calculation subroutines for the DXCoolingSystem Module
     // *****************************************************************************
 
-    void ControlDXHeatingSystem(int const DXSystemNum,        // index to DXSystem
-                                bool const FirstHVACIteration // First HVAC iteration flag
-    )
+    void ControlDXHeatingSystem(OutputFiles &outputFiles, int const DXSystemNum, bool const FirstHVACIteration)
     {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         Brent Griffith (derived from ControlDXSystem by Richard Liesen)
@@ -698,13 +693,19 @@ namespace HVACDXHeatPumpSystem {
 
                         // Get no load result
                         PartLoadFrac = 0.0;
-                        SimDXCoil(CompName, On, FirstHVACIteration, DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex, FanOpMode, PartLoadFrac);
+                        SimDXCoil(outputFiles, CompName, On, FirstHVACIteration,
+                                  DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex, FanOpMode, PartLoadFrac,
+                                  Optional<const Real64>(), Optional<const Real64>(), Optional<const Real64>(),
+                                  Optional<const Real64>());
                         NoOutput = Node(InletNode).MassFlowRate * (PsyHFnTdbW(Node(OutletNode).Temp, Node(OutletNode).HumRat) -
                                                                    PsyHFnTdbW(Node(InletNode).Temp, Node(OutletNode).HumRat));
 
                         // Get full load result
                         PartLoadFrac = 1.0;
-                        SimDXCoil(CompName, On, FirstHVACIteration, DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex, FanOpMode, PartLoadFrac);
+                        SimDXCoil(outputFiles, CompName, On, FirstHVACIteration,
+                                  DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex, FanOpMode, PartLoadFrac,
+                                  Optional<const Real64>(), Optional<const Real64>(), Optional<const Real64>(),
+                                  Optional<const Real64>());
 
                         FullOutput = Node(InletNode).MassFlowRate * (PsyHFnTdbW(Node(OutletNode).Temp, Node(InletNode).HumRat) -
                                                                      PsyHFnTdbW(Node(InletNode).Temp, Node(InletNode).HumRat));
@@ -730,8 +731,11 @@ namespace HVACDXHeatPumpSystem {
                             } else {
                                 if (DataGlobals::DoCoilDirectSolutions) {
                                     PartLoadFrac = (DesOutTemp - Node(InletNode).Temp) / (TempOut1 - Node(InletNode).Temp);
-                                    SimDXCoil(
-                                        CompName, On, FirstHVACIteration, DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex, FanOpMode, PartLoadFrac);
+                                    SimDXCoil(outputFiles,
+                                              CompName, On, FirstHVACIteration,
+                                              DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex, FanOpMode, PartLoadFrac,
+                                              Optional<const Real64>(), Optional<const Real64>(),
+                                              Optional<const Real64>(), Optional<const Real64>());
                                 } else {
                                     Par(1) = double(DXHeatPumpSystem(DXSystemNum).HeatPumpCoilIndex);
                                     Par(2) = DesOutTemp;

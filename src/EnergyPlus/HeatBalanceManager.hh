@@ -56,6 +56,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace HeatBalanceManager {
 
@@ -140,7 +141,7 @@ namespace HeatBalanceManager {
     // Needed for unit tests, should not be normally called.
     void clear_state();
 
-    void ManageHeatBalance();
+    void ManageHeatBalance(EnergyPlus::OutputFiles &outputFiles);
 
     // Get Input Section of the Module
     //******************************************************************************

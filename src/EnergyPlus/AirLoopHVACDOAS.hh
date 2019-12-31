@@ -49,6 +49,7 @@
 #define ENERGYPLUS_AIRLOOPHVACDOAS_HH
 
 #include <EnergyPlus/EnergyPlus.hh>
+#include "OutputFiles.hh"
 #include <string>
 #include <vector>
 
@@ -67,9 +68,6 @@ namespace AirLoopHVACDOAS {
 
     public:
         AirLoopMixer(); // constructor
-        ~AirLoopMixer() // destructor
-        {
-        }
 
         std::string name;
         static AirLoopMixer *factory(int object_type_of_num, std::string const objectName);
@@ -92,9 +90,6 @@ namespace AirLoopHVACDOAS {
 
     public:
         AirLoopSplitter(); // constructor
-        ~AirLoopSplitter() // destructor
-        {
-        }
 
         std::string name;
         static AirLoopSplitter *factory(int object_type_of_num, std::string const objectName);
@@ -113,6 +108,7 @@ namespace AirLoopHVACDOAS {
 
     struct AirLoopDOAS
     {
+        std::reference_wrapper<OutputFiles> m_outputFiles;
 
         // friend class AirLoopMixer and AirLoopSplitter;
         // members
@@ -178,13 +174,9 @@ namespace AirLoopHVACDOAS {
         // private members not initialized in constructor
 
     public:
-        AirLoopDOAS(); // constructor
+        AirLoopDOAS(OutputFiles &outputFiles); // constructor
 
-        ~AirLoopDOAS() // destructor
-        {
-        }
-
-        static void getAirLoopDOASInput();
+        static void getAirLoopDOASInput(OutputFiles &outputFiles);
 
         void SimAirLoopHVACDOAS(bool const firstHVACIteration, int &CompIndex);
 
@@ -200,7 +192,7 @@ namespace AirLoopHVACDOAS {
     extern std::vector<AirLoopDOAS> airloopDOAS;
     int getAirLoopMixerIndex(std::string const &objectName);
     int getAirLoopSplitterIndex(std::string const &objectName);
-    void getAirLoopHVACDOASInput();
+    void getAirLoopHVACDOASInput(OutputFiles &outputFiles);
     extern bool GetInputOnceFlag;
 } // namespace AirLoopHVACDOAS
 } // namespace EnergyPlus

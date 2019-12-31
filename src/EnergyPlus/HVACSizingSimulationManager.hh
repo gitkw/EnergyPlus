@@ -96,13 +96,16 @@ public:
     void UpdateSizingLogsZoneStep();
     void UpdateSizingLogsSystemStep();
 
+    HVACSizingSimulationManager(OutputFiles &outputFiles) : m_outputFiles(outputFiles) {}
 private:
+    std::reference_wrapper<OutputFiles> m_outputFiles;
+
     void CreateNewCoincidentPlantAnalysisObject(std::string const &PlantLoopName, int const PlantSizingIndex);
 };
 
 extern std::unique_ptr<HVACSizingSimulationManager> hvacSizingSimulationManager;
 
-void ManageHVACSizingSimulation(bool &ErrorsFound);
+void ManageHVACSizingSimulation(OutputFiles &outputFiles, bool &ErrorsFound);
 
 } // namespace EnergyPlus
 

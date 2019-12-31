@@ -52,6 +52,7 @@
 #include <vector>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace UnitarySystems {
 
@@ -95,9 +96,6 @@ namespace UnitarySystems {
 
     public:
         DesignSpecMSHP(); // constructor
-        ~DesignSpecMSHP() // destructor
-        {
-        }
 
         std::string name;
         static DesignSpecMSHP *factory(int object_type_of_num, std::string const objectName);
@@ -149,7 +147,7 @@ namespace UnitarySystems {
         };
 
         // friend class DesignSpecMSHP;
-
+        std::reference_wrapper<OutputFiles> m_outputFiles;
         int m_UnitarySysNum;
         int m_unitarySystemType_Num;
         bool m_ThisSysInputShouldBeGotten;
@@ -470,7 +468,7 @@ namespace UnitarySystems {
         };
         WarnMessages warnIndex;
 
-        static void getUnitarySystemInput(std::string const &Name, bool const ZoneEquipment, int const ZoneOAUnitNum);
+        static void getUnitarySystemInput(OutputFiles &outputFiles, std::string const &Name, bool const ZoneEquipment, int const ZoneOAUnitNum);
 
         static Real64 DOE2DXCoilResidual(Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                          std::vector<Real64> const &Par // par(1) = DX coil number
@@ -524,11 +522,13 @@ namespace UnitarySystems {
                                                       std::vector<Real64> const &Par // par( 1 ) = double( UnitarySysNum );
         );
 
-        static Real64 multiModeDXCoilResidual(Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+        static Real64 multiModeDXCoilResidual(OutputFiles &outputFiles,
+                                              Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                               std::vector<Real64> const &Par // par(1) = DX coil number
         );
 
-        static Real64 multiModeDXCoilHumRatResidual(Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+        static Real64 multiModeDXCoilHumRatResidual(OutputFiles &outputFiles,
+                                                    Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                                     std::vector<Real64> const &Par // par(1) = DX coil number
         );
 
@@ -583,7 +583,8 @@ namespace UnitarySystems {
 
         void unitarySystemHeatRecovery();
 
-        void controlUnitarySystemtoSP(int const AirLoopNum,          // Primary air loop number
+        void controlUnitarySystemtoSP(OutputFiles &outputFiles,
+                                      int const AirLoopNum,          // Primary air loop number
                                       bool const FirstHVACIteration, // True when first HVAC iteration
                                       int &CompOn,                   // compressor on/off control
                                       Real64 const OAUCoilOutTemp,   // the coil inlet temperature of OutdoorAirUnit
@@ -663,7 +664,8 @@ namespace UnitarySystems {
         void calcUnitarySuppSystemToSP(bool const FirstHVACIteration // True when first HVAC iteration
         );
 
-        void controlCoolingSystemToSP(int const AirLoopNum,          // index to air loop
+        void controlCoolingSystemToSP(OutputFiles &outputFiles,
+                                      int const AirLoopNum,          // index to air loop
                                       bool const FirstHVACIteration, // First HVAC iteration flag
                                       bool &HXUnitOn,                // flag to enable heat exchanger heat recovery
                                       int &CompOp                    // compressor on/off control
@@ -702,17 +704,14 @@ namespace UnitarySystems {
         );
 
     public:
-        UnitarySys(); // constructor
+        UnitarySys(OutputFiles &outputFiles); // constructor
 
-        ~UnitarySys() // destructor
-        {
-        }
+        static void getUnitarySystemInputData(OutputFiles &outputFiles, std::string const &Name, bool const ZoneEquipment, int const ZoneOAUnitNum, bool &errorsFound);
 
-        static void getUnitarySystemInputData(std::string const &Name, bool const ZoneEquipment, int const ZoneOAUnitNum, bool &errorsFound);
+        static UnitarySys *factory(OutputFiles &outputFiles, int const object_type_of_num, std::string const objectName, bool const ZoneEquipment, int const ZoneOAUnitNum);
 
-        static UnitarySys *factory(int const object_type_of_num, std::string const objectName, bool const ZoneEquipment, int const ZoneOAUnitNum);
-
-        void simulate(std::string const &Name,
+        void simulate(OutputFiles &outputFiles,
+                      std::string const &Name,
                       bool const firstHVACIteration,
                       int const &AirLoopNum,
                       int &CompIndex,
@@ -725,7 +724,8 @@ namespace UnitarySystems {
                       Real64 &latOutputProvided    // latent output at supply air node
         );
 
-        void simulate(std::string const &Name,
+        void simulate(OutputFiles &outputFiles,
+                      std::string const &Name,
                       bool const firstHVACIteration,
                       int const &AirLoopNum,
                       int &CompIndex,
@@ -736,7 +736,8 @@ namespace UnitarySystems {
                       bool const ZoneEquipment     // TRUE if called as zone equipment
         );
 
-        void simulateSys(std::string const &Name,
+        void simulateSys(OutputFiles &outputFiles,
+                         std::string const &Name,
                          bool const firstHVACIteration,
                          int const &AirLoopNum,
                          int &CompIndex,
@@ -762,9 +763,10 @@ namespace UnitarySystems {
                                      int const CompOn               // Determines if compressor is on or off
         );
 
-        static void checkUnitarySysCoilInOASysExists(std::string const &UnitarySysName, int const ZoneOAUnitNum);
+        static void checkUnitarySysCoilInOASysExists(OutputFiles &outputFiles, std::string const &UnitarySysName, int const ZoneOAUnitNum);
 
-        static void getUnitarySysHeatCoolCoil(std::string const &UnitarySysName, // Name of Unitary System object
+        static void getUnitarySysHeatCoolCoil(OutputFiles &outputFiles,
+                                              std::string const &UnitarySysName, // Name of Unitary System object
                                               bool &CoolingCoil,                 // Cooling coil exists
                                               bool &HeatingCoil,                 // Heating coil exists
                                               int const ZoneOAUnitNum            // index to zone OA unit

@@ -280,7 +280,7 @@ namespace HeatBalanceManager {
         UniqueConstructNames.clear();
     }
 
-    void ManageHeatBalance()
+    void ManageHeatBalance(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -364,7 +364,7 @@ namespace HeatBalanceManager {
         // may be a radiant system in the building which will require iteration between
         // the HVAC system (called from the Air Heat Balance) and the zone (simulated
         // in the Surface Heat Balance Manager).  In the future, this may be improved.
-        ManageSurfaceHeatBalance();
+        ManageSurfaceHeatBalance(outputFiles);
         ManageEMS(emsCallFromEndZoneTimestepBeforeZoneReporting, anyRan); // EMS calling point
         RecKeepHeatBalance();                                             // Do any heat balance related record keeping
 

@@ -216,6 +216,7 @@
 #include <EnergyPlus/ScheduleManager.hh>
 #include <EnergyPlus/SimulationManager.hh>
 #include <EnergyPlus/UtilityRoutines.hh>
+#include "OutputFiles.hh"
 
 #ifdef _WIN32
 #include <direct.h>
@@ -463,7 +464,8 @@ int RunEnergyPlus(std::string const & filepath)
 
         ResultsFramework::OutputSchema->setupOutputOptions();
 
-        ManageSimulation();
+        OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+        ManageSimulation(outputFiles);
 
         ShowMessage("Simulation Error Summary *************");
 

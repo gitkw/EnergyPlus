@@ -45,74 +45,21 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 // POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef RoomAirModelManager_hh_INCLUDED
-#define RoomAirModelManager_hh_INCLUDED
+#include "DataGlobals.hh"
+#include "OutputFiles.hh"
 
-// EnergyPlus Headers
-#include <EnergyPlus/EnergyPlus.hh>
+#include <ObjexxFCL/gio.hh>
+
 
 namespace EnergyPlus {
+OutputFiles OutputFiles::makeOutputFiles()
+{
+    assert(ObjexxFCL::gio::out_stream(EnergyPlus::DataGlobals::OutputFileInits));
+    return OutputFiles();
+}
 
-namespace RoomAirModelManager {
-
-    // Data
-    // MODULE PARAMETER DEFINITIONS
-    // na
-
-    // DERIVED TYPE DEFINITIONS
-    // na
-
-    // MODULE VARIABLE DECLARATIONS:
-
-    extern bool GetUCSDDVDataFlag; // UCSD
-    extern bool GetAirModelData;   // Used to "get" all air model data
-
-    // SUBROUTINE SPECIFICATIONS FOR MODULE
-
-    // Functions
-
-    void clear_state();
-
-    void ManageAirModel(OutputFiles &outputFiles, int &ZoneNum);
-
-    //*****************************************************************************************
-
-    void GetAirModelDatas();
-
-    void GetUserDefinedPatternData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    void GetAirNodeData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    //*****************************************************************************************
-
-    void GetMundtData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    void GetDisplacementVentData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    void GetCrossVentData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    void GetUFADZoneData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    void SharedDVCVUFDataInit(int &ZoneNum);
-
-    void GetRoomAirflowNetworkData(bool &ErrorsFound); // True if errors found during this get input routine
-
-    void GetRAFNNodeNum(std::string const &RAFNNodeName,
-                        int &ZoneNum,
-                        int &RAFNNodeNum,
-                        bool &Errorfound); // find zone number and node number based on the node name
-
-    bool CheckEquipName(std::string const &EquipType,
-                        std::string const &EquipName,
-                        std::string &SupplyNodeName,
-                        std::string &ReturnNodeName,
-                        int TotNumEquip,
-                        int TypeNum); // Ensure valid equipment name
-
-    //*****************************************************************************************
-
-} // namespace RoomAirModelManager
+OutputFiles::OutputFiles() : eio{*ObjexxFCL::gio::out_stream(EnergyPlus::DataGlobals::OutputFileInits)}
+{
+}
 
 } // namespace EnergyPlus
-
-#endif

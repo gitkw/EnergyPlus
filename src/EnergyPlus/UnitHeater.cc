@@ -1572,7 +1572,7 @@ namespace UnitHeater {
                             MinWaterFlow = Node(ControlNode).MassFlowRateMinAvail;
                         }
                         // control water flow to obtain output matching QZnReq
-                        ControlCompOutput(UnitHeat(UnitHeatNum).Name,
+                        ControlCompOutput(outputFiles, UnitHeat(UnitHeatNum).Name,
                                           cMO_UnitHeater,
                                           UnitHeatNum,
                                           FirstHVACIteration,
@@ -1590,7 +1590,7 @@ namespace UnitHeater {
                                           _,
                                           UnitHeat(UnitHeatNum).HWLoopNum,
                                           UnitHeat(UnitHeatNum).HWLoopSide,
-                                          UnitHeat(UnitHeatNum).HWBranchNum);
+                                          UnitHeat(UnitHeatNum).HWBranchNum, ObjexxFCL::Optional_int_const());
 
                     } else if ((SELECT_CASE_var == ElectricCoil) || (SELECT_CASE_var == GasCoil) || (SELECT_CASE_var == SteamCoil)) {
                         HCoilOn = true;

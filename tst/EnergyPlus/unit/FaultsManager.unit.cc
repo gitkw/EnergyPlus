@@ -245,7 +245,7 @@ TEST_F(EnergyPlusFixture, FaultsManager_TemperatureSensorOffset_CoilSAT)
     HVACControllers::GetControllerInput();
 
     // Run
-    CheckAndReadFaults();
+    CheckAndReadFaults(<#initializer#>);
 
     // Check
     EXPECT_EQ(2.0, FaultsCoilSATSensor(1).Offset);

@@ -170,7 +170,8 @@ namespace PoweredInductionUnits {
 
     void clear_state();
 
-    void SimPIU(std::string const &CompName,   // name of the PIU
+    void SimPIU(OutputFiles &outputFiles,
+                std::string const &CompName,   // name of the PIU
                 bool const FirstHVACIteration, // TRUE if first HVAC iteration in time step
                 int const ZoneNum,             // index of zone served by PIU
                 int const ZoneNodeNum,         // zone node number of zone served by PIU
@@ -185,13 +186,15 @@ namespace PoweredInductionUnits {
 
     void SizePIU(int const PIUNum);
 
-    void CalcSeriesPIU(int const PIUNum,             // number of the current PIU being simulated
+    void CalcSeriesPIU(OutputFiles &outputFiles,
+                       int const PIUNum,             // number of the current PIU being simulated
                        int const ZoneNum,            // number of zone being served
                        int const ZoneNode,           // zone node number
                        bool const FirstHVACIteration // TRUE if 1st HVAC simulation of system timestep
     );
 
-    void CalcParallelPIU(int const PIUNum,             // number of the current PIU being simulated
+    void CalcParallelPIU(OutputFiles &outputFiles,
+                         int const PIUNum,             // number of the current PIU being simulated
                          int const ZoneNum,            // number of zone being served
                          int const ZoneNode,           // zone node number
                          bool const FirstHVACIteration // TRUE if 1st HVAC simulation of system timestep

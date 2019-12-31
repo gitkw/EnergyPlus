@@ -2979,7 +2979,7 @@ namespace UnitVentilator {
 
                             if (SELECT_CASE_var == Heating_WaterCoilType) {
                                 // control water flow to obtain output matching QZnReq
-                                ControlCompOutput(UnitVent(UnitVentNum).Name,
+                                ControlCompOutput(outputFiles, UnitVent(UnitVentNum).Name,
                                                   cMO_UnitVentilator,
                                                   UnitVentNum,
                                                   FirstHVACIteration,
@@ -2997,7 +2997,7 @@ namespace UnitVentilator {
                                                   _,
                                                   UnitVent(UnitVentNum).HWLoopNum,
                                                   UnitVent(UnitVentNum).HWLoopSide,
-                                                  UnitVent(UnitVentNum).HWBranchNum);
+                                                  UnitVent(UnitVentNum).HWBranchNum, ObjexxFCL::Optional_int_const());
 
                             } else if ((SELECT_CASE_var == Heating_GasCoilType) || (SELECT_CASE_var == Heating_ElectricCoilType) ||
                                        (SELECT_CASE_var == Heating_SteamCoilType)) {
@@ -3190,7 +3190,7 @@ namespace UnitVentilator {
                     } else { // NOT a cycling operating mode
                         // control water flow to obtain output matching QZnReq
                         HCoilOn = false;
-                        ControlCompOutput(UnitVent(UnitVentNum).Name,
+                        ControlCompOutput(outputFiles, UnitVent(UnitVentNum).Name,
                                           cMO_UnitVentilator,
                                           UnitVentNum,
                                           FirstHVACIteration,
@@ -3208,7 +3208,7 @@ namespace UnitVentilator {
                                           _,
                                           UnitVent(UnitVentNum).CWLoopNum,
                                           UnitVent(UnitVentNum).CWLoopSide,
-                                          UnitVent(UnitVentNum).CWBranchNum);
+                                          UnitVent(UnitVentNum).CWBranchNum, ObjexxFCL::Optional_int_const());
 
                     } // end from IF (OpMode .EQ. CycFanCycCoil) THEN
                 }
@@ -3353,8 +3353,11 @@ namespace UnitVentilator {
 
             if (UnitVent(UnitVentNum).CCoilPresent) {
                 if (UnitVent(UnitVentNum).CCoilType == Cooling_CoilHXAssisted) {
-                    SimHXAssistedCoolingCoil(
-                        UnitVent(UnitVentNum).CCoilName, FirstHVACIteration, On, 0.0, UnitVent(UnitVentNum).CCoil_Index, ContFanCycCoil);
+                    SimHXAssistedCoolingCoil(outputFiles,
+                                             UnitVent(UnitVentNum).CCoilName, FirstHVACIteration, On, 0.0,
+                                             UnitVent(UnitVentNum).CCoil_Index, ContFanCycCoil,
+                                             ObjexxFCL::Optional_bool_const(), Optional<const Real64>(),
+                                             ObjexxFCL::Optional_bool_const(), Optional<Real64>());
                 } else {
                     SimulateWaterCoilComponents(UnitVent(UnitVentNum).CCoilName, FirstHVACIteration, UnitVent(UnitVentNum).CCoil_Index);
                 }
@@ -3443,8 +3446,11 @@ namespace UnitVentilator {
                                      UnitVent(UnitVentNum).CWCompNum);
 
                 if (UnitVent(UnitVentNum).CCoilType == Cooling_CoilHXAssisted) {
-                    SimHXAssistedCoolingCoil(
-                        UnitVent(UnitVentNum).CCoilName, FirstHVACIteration, On, PartLoadRatio, UnitVent(UnitVentNum).CCoil_Index, FanOpMode);
+                    SimHXAssistedCoolingCoil(outputFiles,
+                                             UnitVent(UnitVentNum).CCoilName, FirstHVACIteration, On, PartLoadRatio,
+                                             UnitVent(UnitVentNum).CCoil_Index, FanOpMode,
+                                             ObjexxFCL::Optional_bool_const(), Optional<const Real64>(),
+                                             ObjexxFCL::Optional_bool_const(), Optional<Real64>());
                 } else {
                     SimulateWaterCoilComponents(
                         UnitVent(UnitVentNum).CCoilName, FirstHVACIteration, UnitVent(UnitVentNum).CCoil_Index, QCoilReq, FanOpMode, PartLoadRatio);

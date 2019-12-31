@@ -253,7 +253,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils1)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -491,7 +491,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils2)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -727,7 +727,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils3)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -964,7 +964,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils4)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -1375,7 +1375,7 @@ TEST_F(EnergyPlusFixture, TestSizingRoutineForHotWaterCoils6)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();

@@ -146,7 +146,7 @@ namespace SizingManager {
         NumAirLoops = 0;
     }
 
-    void ManageSizing()
+    void ManageSizing(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -323,7 +323,7 @@ namespace SizingManager {
 
             ResetEnvironmentCounter();
             KickOffSizing = true;
-            SetupZoneSizing(ErrorsFound); // Should only be done ONCE
+            SetupZoneSizing(outputFiles, ErrorsFound); // Should only be done ONCE
             KickOffSizing = false;
 
             for (iZoneCalcIter = 1; iZoneCalcIter <= numZoneSizeIter; ++iZoneCalcIter) { // normally this is performed once but if load component
@@ -443,7 +443,7 @@ namespace SizingManager {
                                     DesDayWeath(CurOverallSimDay).Press(TimeStepInDay) = OutBaroPress;
                                 }
 
-                                ManageHeatBalance();
+                                ManageHeatBalance(outputFiles);
 
                                 BeginHourFlag = false;
                                 BeginDayFlag = false;
@@ -548,8 +548,8 @@ namespace SizingManager {
             SimAir = true;
             SimZoneEquip = true;
 
-            ManageZoneEquipment(true, SimZoneEquip, SimAir);
-            ManageAirLoops(true, SimAir, SimZoneEquip);
+            ManageZoneEquipment(outputFiles, true, SimZoneEquip, SimAir);
+            ManageAirLoops(outputFiles, true, SimAir, SimZoneEquip);
             SizingManager::UpdateTermUnitFinalZoneSizing(); // AirDistUnits have been loaded now so TermUnitSizing values are all in place
             SimAirServingZones::SizeSysOutdoorAir();        // System OA can be sized now that TermUnitFinalZoneSizing is initialized
             ResetEnvironmentCounter();
@@ -661,7 +661,7 @@ namespace SizingManager {
             SimAir = true;
             SimZoneEquip = true;
 
-            ManageZoneEquipment(true, SimZoneEquip, SimAir);
+            ManageZoneEquipment(outputFiles, true, SimZoneEquip, SimAir);
             SizingManager::UpdateTermUnitFinalZoneSizing(); // AirDistUnits have been loaded now so TermUnitSizing values are all in place
         }
         SysSizingCalc = false;
@@ -864,7 +864,7 @@ namespace SizingManager {
         }
     }
 
-    void ManageSystemSizingAdjustments()
+    void ManageSystemSizingAdjustments(OutputFiles &outputFiles)
     {
         // This routine adjusts system sizing outcomes based on how the zone air terminals finish out their sizing.
         // The zone models are executed to trigger their sizing routines
@@ -881,7 +881,7 @@ namespace SizingManager {
             bool t_SimZoneEquip(true);
             bool t_SimAir(false);
             DataGlobals::BeginEnvrnFlag = true; // trigger begin envrn blocks in zone equipment models
-            ZoneEquipmentManager::ManageZoneEquipment(true, t_SimZoneEquip, t_SimAir);
+            ZoneEquipmentManager::ManageZoneEquipment(outputFiles, true, t_SimZoneEquip, t_SimAir);
             DataGlobals::BeginEnvrnFlag = false;
 
             for (int AirLoopNum = 1; AirLoopNum <= NumPrimaryAirSys; ++AirLoopNum) {
@@ -3913,7 +3913,7 @@ namespace SizingManager {
         }
     }
 
-    void SetupZoneSizing(bool &ErrorsFound)
+    void SetupZoneSizing(OutputFiles &outputFiles, bool &ErrorsFound)
     {
 
         // SUBROUTINE INFORMATION:
@@ -3979,7 +3979,7 @@ namespace SizingManager {
 
             ManageWeather();
 
-            ManageHeatBalance();
+            ManageHeatBalance(outputFiles);
 
             BeginHourFlag = false;
             BeginDayFlag = false;
@@ -3990,7 +3990,7 @@ namespace SizingManager {
             //          ! do another timestep=1
             ManageWeather();
 
-            ManageHeatBalance();
+            ManageHeatBalance(outputFiles);
 
             //         do an end of day, end of environment time step
 
@@ -4000,7 +4000,7 @@ namespace SizingManager {
 
             ManageWeather();
 
-            ManageHeatBalance();
+            ManageHeatBalance(outputFiles);
 
         } // ... End environment loop.
     }

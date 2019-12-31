@@ -100,7 +100,8 @@ namespace ZoneEquipmentManager {
     // Functions
     void clear_state();
 
-    void ManageZoneEquipment(bool const FirstHVACIteration,
+    void ManageZoneEquipment(OutputFiles &outputFiles,
+                             bool const FirstHVACIteration,
                              bool &SimZone,                     // Set to false at the end of the routine
                              bool &SimAir                       // Eventually set to true via SimZoneEquipment if AirLoop must be resimulated
     );
@@ -117,7 +118,7 @@ namespace ZoneEquipmentManager {
 
     void UpdateZoneSizing(int const CallIndicator);
 
-    void SimZoneEquipment(bool const FirstHVACIteration, bool &SimAir);
+    void SimZoneEquipment(OutputFiles &outputFiles, bool const FirstHVACIteration, bool &SimAir);
 
     void SetZoneEquipSimOrder(int const ControlledZoneNum, int const ActualZoneNum);
 

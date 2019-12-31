@@ -175,7 +175,8 @@ namespace HVACStandAloneERV {
 
     void clear_state();
 
-    void SimStandAloneERV(std::string const &CompName,   // name of the Stand Alone ERV unit
+    void SimStandAloneERV(OutputFiles &outputFiles,
+                          std::string const &CompName,   // name of the Stand Alone ERV unit
                           int const ZoneNum,             // number of zone being served unused1208
                           bool const FirstHVACIteration, // TRUE if 1st HVAC simulation of system timestep
                           Real64 &SensLoadMet,           // net sensible load supplied by the ERV unit to the zone (W)
@@ -185,7 +186,8 @@ namespace HVACStandAloneERV {
 
     void GetStandAloneERV();
 
-    void InitStandAloneERV(int const StandAloneERVNum,   // number of the current Stand Alone ERV unit being simulated
+    void InitStandAloneERV(OutputFiles &outputFiles,
+                           int const StandAloneERVNum,   // number of the current Stand Alone ERV unit being simulated
                            int const ZoneNum,            // number of zone being served unused1208
                            bool const FirstHVACIteration // TRUE if first HVAC iteration
     );

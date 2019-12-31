@@ -3278,7 +3278,8 @@ namespace SetPointManager {
             }
 
             SZOneStageCoolingSetPtMgr(SetPtMgrNum).ControlZoneName = cAlphaArgs(2);
-            SZOneStageCoolingSetPtMgr(SetPtMgrNum).ZoneNodeNum = GetSystemNodeNumberForZone(cAlphaArgs(2));
+            SZOneStageCoolingSetPtMgr(SetPtMgrNum).ZoneNodeNum = GetSystemNodeNumberForZone(outputFiles,
+                                                                                            cAlphaArgs(2));
             // get the actual zone number of the control zone
             SZOneStageCoolingSetPtMgr(SetPtMgrNum).ControlZoneNum = UtilityRoutines::FindItemInList(cAlphaArgs(2), Zone);
             if (SZOneStageCoolingSetPtMgr(SetPtMgrNum).ControlZoneNum == 0) {
@@ -3371,7 +3372,8 @@ namespace SetPointManager {
             }
 
             SZOneStageHeatingSetPtMgr(SetPtMgrNum).ControlZoneName = cAlphaArgs(2);
-            SZOneStageHeatingSetPtMgr(SetPtMgrNum).ZoneNodeNum = GetSystemNodeNumberForZone(cAlphaArgs(2));
+            SZOneStageHeatingSetPtMgr(SetPtMgrNum).ZoneNodeNum = GetSystemNodeNumberForZone(outputFiles,
+                                                                                            cAlphaArgs(2));
             // get the actual zone number of the control zone
             SZOneStageHeatingSetPtMgr(SetPtMgrNum).ControlZoneNum = UtilityRoutines::FindItemInList(cAlphaArgs(2), Zone);
             if (SZOneStageHeatingSetPtMgr(SetPtMgrNum).ControlZoneNum == 0) {

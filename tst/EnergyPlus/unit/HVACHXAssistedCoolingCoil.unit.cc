@@ -388,13 +388,14 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     HeatBalanceManager::GetZoneData(ErrorsFound); // read zone data
     EXPECT_FALSE(ErrorsFound);                    // expect no errors
 
-    DataZoneEquipment::GetZoneEquipmentData1(); // read zone equipment configuration and list objects
+    DataZoneEquipment::GetZoneEquipmentData1(outputFiles); // read zone equipment configuration and list objects
 
     DataSizing::ZoneEqSizing.allocate(1);
     DataZoneEquipment::ZoneEquipList(1).EquipIndex.allocate(1);
     DataZoneEquipment::ZoneEquipList(1).EquipIndex(1) = 1; // initialize equipment index for ZoneHVAC
 
-    UnitarySystems::UnitarySys thisSys;
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    UnitarySystems::UnitarySys thisSys{outputFiles};
     UnitarySystems::UnitarySys *mySys;
     int AirLoopNum = 0;
     int CompIndex = 0;
@@ -404,9 +405,9 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     Real64 OAUCoilOutTemp = 0.0;
     std::string compName = "GASHEAT DXAC FURNACE 1";
     bool zoneEquipment = true;
-    mySys = thisSys.factory(DataHVACGlobals::UnitarySys_AnyCoilType, compName, zoneEquipment, 0);
+    mySys = thisSys.factory(outputFiles, DataHVACGlobals::UnitarySys_AnyCoilType, compName, zoneEquipment, 0);
     DataZoneEquipment::ZoneEquipInputsFilled = true;                           // indicate zone data is available
-    mySys->getUnitarySystemInputData(compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
+    mySys->getUnitarySystemInputData(outputFiles, compName, zoneEquipment, 0, ErrorsFound); // get UnitarySystem input from object above
 
     ASSERT_EQ(1, UnitarySystems::numUnitarySystems); // only 1 unitary system above so expect 1 as number of unitary system objects
 
@@ -461,7 +462,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     DataLoopNode::Node(InletNode).MassFlowRateMaxAvail = mySys->m_MaxCoolAirVolFlow * DataEnvironment::StdRhoAir;
 
     OutputReportPredefined::SetPredefinedTables();
-    mySys->simulate(compName, FirstHVACIteration, AirLoopNum, CompIndex, HeatingActive, CoolingActive, OAUnitNum, OAUCoilOutTemp, zoneEquipment);
+    mySys->simulate(outputFiles, compName, FirstHVACIteration, AirLoopNum, CompIndex, HeatingActive, CoolingActive, OAUnitNum, OAUCoilOutTemp, zoneEquipment);
 
     ZoneTemp = DataLoopNode::Node(ControlZoneNum).Temp;
     CpAir = Psychrometrics::PsyCpAirFnWTdb(DataLoopNode::Node(InletNode).HumRat, DataLoopNode::Node(InletNode).Temp);
@@ -493,7 +494,7 @@ TEST_F(EnergyPlusFixture, HXAssistCCUnitarySystem_VStest1)
     DataEnvironment::OutBaroPress = 101325.0;
     DataEnvironment::OutWetBulbTemp = 30.0;
 
-    mySys->simulate(compName, FirstHVACIteration, AirLoopNum, CompIndex, HeatingActive, CoolingActive, OAUnitNum, OAUCoilOutTemp, zoneEquipment);
+    mySys->simulate(outputFiles, compName, FirstHVACIteration, AirLoopNum, CompIndex, HeatingActive, CoolingActive, OAUnitNum, OAUCoilOutTemp, zoneEquipment);
 
     ZoneTemp = DataLoopNode::Node(ControlZoneNum).Temp;
     CpAir = Psychrometrics::PsyCpAirFnWTdb(DataLoopNode::Node(InletNode).HumRat, DataLoopNode::Node(InletNode).Temp);

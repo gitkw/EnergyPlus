@@ -161,8 +161,9 @@ namespace UnitarySystems {
     {
     }
 
-    UnitarySys::UnitarySys() // constructor
-        : m_UnitarySysNum(-1), m_unitarySystemType_Num(0), m_ThisSysInputShouldBeGotten(true), m_SysAvailSchedPtr(0),
+    UnitarySys::UnitarySys(OutputFiles &outputFiles) // constructor
+        : m_outputFiles(outputFiles),
+          m_UnitarySysNum(-1), m_unitarySystemType_Num(0), m_ThisSysInputShouldBeGotten(true), m_SysAvailSchedPtr(0),
           m_ControlType(ControlType::None), m_DehumidControlType_Num(DehumCtrlType::None), m_Humidistat(false), m_ValidASHRAECoolCoil(false),
           m_ValidASHRAEHeatCoil(false), m_SimASHRAEModel(false), m_setFaultModelInput(true), m_FanIndex(0), m_FanPlace(FanPlace::NotYetSet),
           m_FanOpModeSchedPtr(0), m_FanExists(false), m_FanType_Num(0), m_RequestAutoSize(false), m_ActualFanVolFlowRate(0.0),
@@ -248,7 +249,8 @@ namespace UnitarySystems {
         if (designSpecMSHP.size() > 0) designSpecMSHP.clear();
     }
 
-    void UnitarySys::simulate(std::string const &Name,
+    void UnitarySys::simulate(OutputFiles &outputFiles,
+                              std::string const &Name,
                               bool const FirstHVACIteration,
                               int const &AirLoopNum,
                               int &CompIndex,
@@ -260,7 +262,8 @@ namespace UnitarySystems {
                               Real64 &sysOutputProvided,
                               Real64 &latOutputProvided)
     {
-        simulateSys(Name,
+        simulateSys(outputFiles,
+                    Name,
                     FirstHVACIteration,
                     AirLoopNum,
                     CompIndex,
@@ -273,7 +276,8 @@ namespace UnitarySystems {
                     latOutputProvided);
     }
 
-    void UnitarySys::simulate(std::string const &Name,
+    void UnitarySys::simulate(OutputFiles &outputFiles,
+                              std::string const &Name,
                               bool const FirstHVACIteration,
                               int const &AirLoopNum,
                               int &CompIndex,
@@ -285,7 +289,8 @@ namespace UnitarySystems {
     {
         Real64 sysOutputProvided = 0.0;
         Real64 latOutputProvided = 0.0;
-        simulateSys(Name,
+        simulateSys(outputFiles,
+                    Name,
                     FirstHVACIteration,
                     AirLoopNum,
                     CompIndex,
@@ -298,7 +303,8 @@ namespace UnitarySystems {
                     latOutputProvided);
     }
 
-    void UnitarySys::simulateSys(std::string const &Name,
+    void UnitarySys::simulateSys(OutputFiles &outputFiles,
+                                 std::string const &Name,
                                  bool const FirstHVACIteration,
                                  int const &AirLoopNum,
                                  int &CompIndex,
@@ -315,7 +321,7 @@ namespace UnitarySystems {
         // Obtains and Allocates unitary system related parameters from input file
         if (this->m_ThisSysInputShouldBeGotten) {
             // Get the unitary system input
-            getUnitarySystemInput(Name, ZoneEquipment, ZoneOAUnitNum);
+            getUnitarySystemInput(m_outputFiles, Name, ZoneEquipment, ZoneOAUnitNum);
         }
         CompIndex = this->m_UnitarySysNum;
 
@@ -337,9 +343,9 @@ namespace UnitarySystems {
                 auto const SELECT_CASE_var(this->m_ControlType);
                 if (SELECT_CASE_var == ControlType::Setpoint) {
                     if (ZoneEquipment) {
-                        this->controlUnitarySystemtoSP(0, FirstHVACIteration, CompOn, OAUCoilOutTemp, HXUnitOn, sysOutputProvided, latOutputProvided);
+                        this->controlUnitarySystemtoSP(outputFiles, 0, FirstHVACIteration, CompOn, OAUCoilOutTemp, HXUnitOn, sysOutputProvided, latOutputProvided);
                     } else {
-                        this->controlUnitarySystemtoSP(
+                        this->controlUnitarySystemtoSP(outputFiles,
                             AirLoopNum, FirstHVACIteration, CompOn, OAUCoilOutTemp, HXUnitOn, sysOutputProvided, latOutputProvided);
                     }
                 } else if (SELECT_CASE_var == ControlType::Load || SELECT_CASE_var == ControlType::CCMASHRAE) {
@@ -526,10 +532,10 @@ namespace UnitarySystems {
         }
     } // namespace UnitarySystems
 
-    UnitarySys *UnitarySys::factory(int const object_type_of_num, std::string const objectName, bool const ZoneEquipment, int const ZoneOAUnitNum)
+    UnitarySys *UnitarySys::factory(OutputFiles &outputFiles, int const object_type_of_num, std::string const objectName, bool const ZoneEquipment, int const ZoneOAUnitNum)
     {
         if (UnitarySystems::getInputOnceFlag) {
-            UnitarySys::getUnitarySystemInput(objectName, ZoneEquipment, ZoneOAUnitNum);
+            UnitarySys::getUnitarySystemInput(outputFiles, objectName, ZoneEquipment, ZoneOAUnitNum);
             UnitarySystems::getInputOnceFlag = false;
         }
         int sysNum = -1;
@@ -1429,12 +1435,12 @@ namespace UnitarySystems {
         }
     }
 
-    void UnitarySys::getUnitarySystemInput(std::string const &objectName, bool const ZoneEquipment, int const ZoneOAUnitNum)
+    void UnitarySys::getUnitarySystemInput(OutputFiles &outputFiles, std::string const &objectName, bool const ZoneEquipment, int const ZoneOAUnitNum)
     {
 
         bool errorsFound(false);
 
-        UnitarySys::getUnitarySystemInputData(objectName, ZoneEquipment, ZoneOAUnitNum, errorsFound);
+        UnitarySys::getUnitarySystemInputData(outputFiles, objectName, ZoneEquipment, ZoneOAUnitNum, errorsFound);
 
         if (errorsFound) {
             ShowFatalError("getUnitarySystemInputData: previous errors cause termination. Check inputs");
@@ -2083,10 +2089,11 @@ namespace UnitarySystems {
             DataHVACGlobals::MSHPMassFlowRateHigh =
                 EqSizing.CoolingAirVolFlow *
                 DataEnvironment::StdRhoAir; // doesn't matter what this value is since only coil size is needed and CompOn = 0 here
-            DXCoils::SimDXCoilMultiSpeed(blankString, 1.0, 1.0, this->m_CoolingCoilIndex, 0, 0, 0);
+            DXCoils::SimDXCoilMultiSpeed(outputFiles, blankString, 1.0, 1.0, this->m_CoolingCoilIndex, 0, 0, 0,
+                                         ObjexxFCL::Optional_int_const());
             if ( !HardSizeNoDesRun && EqSizing.Capacity ) {
                 // do nothing, the vars EqSizing.DesCoolingLoad and DataSizing::DXCoolCap are already set earlier and the values could be max of the
-                // cooling and heating austosized values. Thus reseting them here to user specified value may not be the design size used else where 
+                // cooling and heating austosized values. Thus reseting them here to user specified value may not be the design size used else where
             } else {
                 DataSizing::DXCoolCap = DXCoils::GetCoilCapacityByIndexType( this->m_CoolingCoilIndex, this->m_CoolingCoilType_Num, ErrFound );
                 EqSizing.DesCoolingLoad = DataSizing::DXCoolCap;
@@ -2379,7 +2386,9 @@ namespace UnitarySystems {
                     DataHVACGlobals::cAllCoilTypes(this->m_CoolingCoilType_Num), this->m_CoolingCoilName, ErrFound);
                 ActualCoolCoilType = HVACHXAssistedCoolingCoil::GetCoilObjectTypeNum(
                     DataHVACGlobals::cAllCoilTypes(this->m_CoolingCoilType_Num), this->m_CoolingCoilName, ErrFound, true);
-                HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(blankString, true, On, 1.0, this->m_CoolingCoilIndex, 1, false, 1.0, false);
+                HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles, blankString, true, On, 1.0,
+                                                                    this->m_CoolingCoilIndex, 1, false, 1.0, false,
+                                                                    Optional<Real64>());
                 DataSizing::DataConstantUsedForSizing = WaterCoils::GetWaterCoilCapacity(
                     UtilityRoutines::MakeUPPERCase(DataHVACGlobals::cAllCoilTypes(ActualCoolCoilType)), HXCoilName, ErrFound);
                 EqSizing.DesCoolingLoad = DataSizing::DataConstantUsedForSizing;
@@ -2432,9 +2441,13 @@ namespace UnitarySystems {
                     this->m_HeatingCoilType_Num == DataHVACGlobals::Coil_HeatingWaterToAirHPSimple)
                     EqSizing.DesHeatingLoad = DataSizing::DataConstantUsedForSizing;
             } else if (this->m_CoolingCoilType_Num == DataHVACGlobals::CoilDX_PackagedThermalStorageCooling) {
-                PackagedThermalStorageCoil::SimTESCoil(this->m_CoolingCoilName, this->m_CoolingCoilIndex, this->m_FanOpMode, this->m_TESOpMode, 0.0);
-                PackagedThermalStorageCoil::GetTESCoilCoolingCapacity(
-                    this->m_CoolingCoilName, DataSizing::DataConstantUsedForSizing, ErrFound, CompType);
+                PackagedThermalStorageCoil::SimTESCoil(outputFiles, this->m_CoolingCoilName,
+                                                       this->m_CoolingCoilIndex, this->m_FanOpMode, this->m_TESOpMode,
+                                                       0.0);
+                PackagedThermalStorageCoil::GetTESCoilCoolingCapacity(outputFiles,
+                                                                      this->m_CoolingCoilName,
+                                                                      DataSizing::DataConstantUsedForSizing, ErrFound,
+                                                                      CompType);
                 EqSizing.DesCoolingLoad = DataSizing::DataConstantUsedForSizing;
                 DataSizing::DataFractionUsedForSizing = 1.0;
                 SizingMethod = DataHVACGlobals::AutoCalculateSizing;
@@ -2653,7 +2666,8 @@ namespace UnitarySystems {
         //    UnitarySystemNumericFields.deallocate(); // remove temporary array for field names at end of sizing
     }
 
-    void UnitarySys::getUnitarySystemInputData(std::string const &objectName, bool const ZoneEquipment, int const ZoneOAUnitNum, bool &errorsFound)
+    void UnitarySys::getUnitarySystemInputData(OutputFiles &outputFiles,
+        std::string const &objectName, bool const ZoneEquipment, int const ZoneOAUnitNum, bool &errorsFound)
     {
 
         static std::string const getUnitarySystemInput("getUnitarySystemInputData");
@@ -2675,7 +2689,7 @@ namespace UnitarySystems {
                 if (!UtilityRoutines::SameString(objectName, thisObjectName) && !UnitarySystems::getInputOnceFlag) continue;
 
                 int sysNum = getUnitarySystemIndex(thisObjectName);
-                UnitarySys thisSys;
+                UnitarySys thisSys{outputFiles};
                 if (sysNum == -1) {
                     ++numUnitarySystems;
                     auto const &thisObjName = instance.key();
@@ -5071,8 +5085,10 @@ namespace UnitarySystems {
                                 errFlag = false;
                             }
 
-                            PackagedThermalStorageCoil::GetTESCoilIndex(
-                                loc_m_CoolingCoilName, thisSys.m_CoolingCoilIndex, errFlag, cCurrentModuleObject);
+                            PackagedThermalStorageCoil::GetTESCoilIndex(outputFiles,
+                                                                        loc_m_CoolingCoilName,
+                                                                        thisSys.m_CoolingCoilIndex, errFlag,
+                                                                        cCurrentModuleObject);
                             if (thisSys.m_CoolingCoilIndex == 0) {
                                 ShowSevereError(cCurrentModuleObject + " = " + thisObjectName);
                                 ShowContinueError("Illegal Cooling Coil Name = " + loc_m_CoolingCoilName);
@@ -5080,16 +5096,20 @@ namespace UnitarySystems {
                                 errFlag = false;
                             }
 
-                            PackagedThermalStorageCoil::GetTESCoilCoolingAirFlowRate(
-                                loc_m_CoolingCoilName, thisSys.m_MaxCoolAirVolFlow, errFlag, cCurrentModuleObject);
+                            PackagedThermalStorageCoil::GetTESCoilCoolingAirFlowRate(outputFiles,
+                                                                                     loc_m_CoolingCoilName,
+                                                                                     thisSys.m_MaxCoolAirVolFlow,
+                                                                                     errFlag, cCurrentModuleObject);
                             if (errFlag) {
                                 ShowContinueError("Occurs in " + cCurrentModuleObject + " = " + thisObjectName);
                                 errorsFound = true;
                                 errFlag = false;
                             }
 
-                            PackagedThermalStorageCoil::GetTESCoilCoolingCapacity(
-                                loc_m_CoolingCoilName, thisSys.m_DesignCoolingCapacity, errFlag, cCurrentModuleObject);
+                            PackagedThermalStorageCoil::GetTESCoilCoolingCapacity(outputFiles,
+                                                                                  loc_m_CoolingCoilName,
+                                                                                  thisSys.m_DesignCoolingCapacity,
+                                                                                  errFlag, cCurrentModuleObject);
                             if (errFlag) {
                                 ShowContinueError("Occurs in " + cCurrentModuleObject + " = " + thisObjectName);
                                 errorsFound = true;
@@ -5098,8 +5118,10 @@ namespace UnitarySystems {
 
                             // Get the Cooling Coil Inlet Node
                             errFlag = false;
-                            PackagedThermalStorageCoil::GetTESCoilAirInletNode(
-                                loc_m_CoolingCoilName, CoolingCoilInletNode, errFlag, cCurrentModuleObject);
+                            PackagedThermalStorageCoil::GetTESCoilAirInletNode(outputFiles,
+                                                                               loc_m_CoolingCoilName,
+                                                                               CoolingCoilInletNode, errFlag,
+                                                                               cCurrentModuleObject);
                             if (errFlag) {
                                 ShowContinueError("Occurs in " + cCurrentModuleObject + " = " + thisObjectName);
                                 errorsFound = true;
@@ -5107,8 +5129,10 @@ namespace UnitarySystems {
                             }
 
                             // Get the Cooling Coil Outlet Node
-                            PackagedThermalStorageCoil::GetTESCoilAirOutletNode(
-                                loc_m_CoolingCoilName, CoolingCoilOutletNode, errFlag, cCurrentModuleObject);
+                            PackagedThermalStorageCoil::GetTESCoilAirOutletNode(outputFiles,
+                                                                                loc_m_CoolingCoilName,
+                                                                                CoolingCoilOutletNode, errFlag,
+                                                                                cCurrentModuleObject);
                             if (errFlag) {
                                 ShowContinueError("Occurs in " + cCurrentModuleObject + " = " + thisObjectName);
                                 errorsFound = true;
@@ -7150,7 +7174,8 @@ namespace UnitarySystems {
         }
     }
 
-    void UnitarySys::controlUnitarySystemtoSP(int const AirLoopNum,          // Primary air loop number
+    void UnitarySys::controlUnitarySystemtoSP(OutputFiles &outputFiles,
+                                              int const AirLoopNum,          // Primary air loop number
                                               bool const FirstHVACIteration, // True when first HVAC iteration
                                               int &CompOn,                   // compressor on/off control
                                               Real64 const OAUCoilOutTemp,   // the coil inlet temperature of OutdoorAirUnit
@@ -7206,7 +7231,7 @@ namespace UnitarySystems {
                                                  OAUCoilOutTemp,
                                                  ZoneLoad,
                                                  this->DesignMaxOutletTemp);
-                this->controlCoolingSystemToSP(AirLoopNum, FirstHVACIteration, HXUnitOn, CompOn);
+                this->controlCoolingSystemToSP(outputFiles, AirLoopNum, FirstHVACIteration, HXUnitOn, CompOn);
                 PartLoadRatio = this->m_CoolingPartLoadFrac;
                 CompOn = 0;
                 if (PartLoadRatio > 0.0) {
@@ -7263,7 +7288,7 @@ namespace UnitarySystems {
                                                  OAUCoilOutTemp,
                                                  ZoneLoad,
                                                  this->DesignMaxOutletTemp);
-                this->controlCoolingSystemToSP(AirLoopNum, FirstHVACIteration, HXUnitOn, CompOn);
+                this->controlCoolingSystemToSP(outputFiles, AirLoopNum, FirstHVACIteration, HXUnitOn, CompOn);
                 PartLoadRatio = this->m_CoolingPartLoadFrac;
                 CompOn = 0;
                 if (PartLoadRatio > 0.0) {
@@ -9936,8 +9961,10 @@ namespace UnitarySystems {
 
             if (SELECT_CASE_var == DataHVACGlobals::CoilDX_CoolingSingleSpeed) { // Coil:Cooling:DX:SingleSpeed
 
-                DXCoils::SimDXCoil(
-                    blankString, CompOn, FirstHVACIteration, CompIndex, this->m_FanOpMode, PartLoadRatio, OnOffAirFlowRatio, CoilCoolHeatRat);
+                DXCoils::SimDXCoil(outputFiles,
+                                   blankString, CompOn, FirstHVACIteration, CompIndex, this->m_FanOpMode, PartLoadRatio,
+                                   OnOffAirFlowRatio, CoilCoolHeatRat, Optional<const Real64>(),
+                                   Optional<const Real64>());
                 this->m_CoolCompPartLoadRatio = PartLoadRatio * double(CompOn);
 
             } else if ((SELECT_CASE_var == DataHVACGlobals::CoilDX_CoolingHXAssisted) ||
@@ -9948,7 +9975,7 @@ namespace UnitarySystems {
                         min(DataLoopNode::Node(this->CoolCoilFluidOutletNodeNum).MassFlowRateMaxAvail, this->MaxCoolCoilFluidFlow * PartLoadRatio);
                     DataLoopNode::Node(this->CoolCoilFluidInletNode).MassFlowRate = mdot;
                 }
-                HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(blankString,
+                HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles, blankString,
                                                                     FirstHVACIteration,
                                                                     CompOn,
                                                                     PartLoadRatio,
@@ -9956,14 +9983,17 @@ namespace UnitarySystems {
                                                                     this->m_FanOpMode,
                                                                     HXUnitOn,
                                                                     OnOffAirFlowRatio,
-                                                                    economizerFlag);
+                                                                    economizerFlag, Optional<Real64>());
                 if (this->m_CoolingCoilType_Num == DataHVACGlobals::CoilDX_CoolingHXAssisted)
                     this->m_CoolCompPartLoadRatio = PartLoadRatio * double(CompOn);
 
             } else if (SELECT_CASE_var == DataHVACGlobals::CoilDX_CoolingTwoSpeed) { // Coil:Cooling:DX:TwoSpeed
                 // formerly (v3 and beyond)COIL:DX:MULTISPEED:COOLINGEMPIRICAL
 
-                DXCoils::SimDXCoilMultiSpeed(blankString, this->m_CoolingSpeedRatio, this->m_CoolingCycRatio, CompIndex);
+                DXCoils::SimDXCoilMultiSpeed(outputFiles, blankString, this->m_CoolingSpeedRatio,
+                                             this->m_CoolingCycRatio, CompIndex, ObjexxFCL::Optional_int_const(),
+                                             ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const(),
+                                             ObjexxFCL::Optional_int_const());
                 if (this->m_CoolingSpeedRatio > 0.0) {
                     this->m_CoolCompPartLoadRatio = this->m_CoolingSpeedRatio * double(CompOn);
                 } else {
@@ -9973,7 +10003,7 @@ namespace UnitarySystems {
             } else if (SELECT_CASE_var == DataHVACGlobals::CoilDX_MultiSpeedCooling) { // Coil:Cooling:DX:Multispeed
 
                 if (OutsideDryBulbTemp > this->m_MinOATCompressorCooling) {
-                    DXCoils::SimDXCoilMultiSpeed(CompName,
+                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName,
                                                  this->m_CoolingSpeedRatio,
                                                  this->m_CoolingCycRatio,
                                                  CompIndex,
@@ -9991,7 +10021,9 @@ namespace UnitarySystems {
                         this->m_CoolCompPartLoadRatio = this->m_CoolingCycRatio * double(CompOn);
                     }
                 } else {
-                    DXCoils::SimDXCoilMultiSpeed(CompName, 0.0, 0.0, CompIndex, this->m_CoolingSpeedNum, this->m_FanOpMode, CompOn);
+                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 0.0, 0.0, CompIndex,
+                                                 this->m_CoolingSpeedNum, this->m_FanOpMode, CompOn,
+                                                 ObjexxFCL::Optional_int_const());
                     this->m_CoolCompPartLoadRatio = 0.0;
                 }
 
@@ -9999,6 +10031,7 @@ namespace UnitarySystems {
                 // formerly (v3 and beyond) COIL:DX:MULTIMODE:COOLINGEMPIRICAL
 
                 DXCoils::SimDXCoilMultiMode(
+                    m_outputFiles,
                     CompName, CompOn, FirstHVACIteration, PartLoadRatio, this->m_DehumidificationMode, CompIndex, this->m_FanOpMode);
                 this->m_CoolCompPartLoadRatio = PartLoadRatio * double(CompOn);
 
@@ -10094,7 +10127,8 @@ namespace UnitarySystems {
 
             } else if (SELECT_CASE_var == DataHVACGlobals::CoilDX_PackagedThermalStorageCooling) {
 
-                PackagedThermalStorageCoil::SimTESCoil(CompName, this->m_CoolingCoilIndex, this->m_FanOpMode, this->m_TESOpMode, PartLoadRatio);
+                PackagedThermalStorageCoil::SimTESCoil(outputFiles, CompName, this->m_CoolingCoilIndex,
+                                                       this->m_FanOpMode, this->m_TESOpMode, PartLoadRatio);
             }
         }
 
@@ -10157,8 +10191,10 @@ namespace UnitarySystems {
 
             if (SELECT_CASE_var == DataHVACGlobals::CoilDX_HeatingEmpirical) { // COIL:HEATING:DX:SINGLESPEED
 
-                DXCoils::SimDXCoil(
-                    CompName, CompOn, FirstHVACIteration, this->m_HeatingCoilIndex, this->m_FanOpMode, PartLoadRatio, OnOffAirFlowRatio);
+                DXCoils::SimDXCoil(outputFiles,
+                                   CompName, CompOn, FirstHVACIteration, this->m_HeatingCoilIndex, this->m_FanOpMode,
+                                   PartLoadRatio, OnOffAirFlowRatio, Optional<const Real64>(), Optional<const Real64>(),
+                                   Optional<const Real64>());
                 this->m_HeatCompPartLoadRatio = PartLoadRatio * double(CompOn);
 
             } else if (SELECT_CASE_var == DataHVACGlobals::Coil_UserDefined) {
@@ -10180,7 +10216,7 @@ namespace UnitarySystems {
             } else if (SELECT_CASE_var == DataHVACGlobals::CoilDX_MultiSpeedHeating) {
 
                 if (OutsideDryBulbTemp > this->m_MinOATCompressorHeating) {
-                    DXCoils::SimDXCoilMultiSpeed(CompName,
+                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName,
                                                  this->m_HeatingSpeedRatio,
                                                  this->m_HeatingCycRatio,
                                                  this->m_HeatingCoilIndex,
@@ -10190,7 +10226,9 @@ namespace UnitarySystems {
                                                  this->m_SingleMode);
                     this->m_HeatCompPartLoadRatio = PartLoadRatio * double(CompOn);
                 } else {
-                    DXCoils::SimDXCoilMultiSpeed(CompName, 0.0, 0.0, this->m_HeatingCoilIndex, this->m_HeatingSpeedNum, this->m_FanOpMode, CompOn);
+                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 0.0, 0.0, this->m_HeatingCoilIndex,
+                                                 this->m_HeatingSpeedNum, this->m_FanOpMode, CompOn,
+                                                 ObjexxFCL::Optional_int_const());
                     this->m_HeatCompPartLoadRatio = 0.0;
                 }
 
@@ -10402,7 +10440,8 @@ namespace UnitarySystems {
         //  UnitarySystem(UnitarySysNum)%SuppHeatPartLoadFrac = PartLoadRatio
     }
 
-    void UnitarySys::controlCoolingSystemToSP(int const AirLoopNum,          // index to air loop
+    void UnitarySys::controlCoolingSystemToSP(OutputFiles &outputFiles,
+                                              int const AirLoopNum,          // index to air loop
                                               bool const FirstHVACIteration, // First HVAC iteration flag
                                               bool &HXUnitOn,                // flag to enable heat exchanger heat recovery
                                               int &CompOn                    // compressor on/off control
@@ -10539,19 +10578,25 @@ namespace UnitarySystems {
                 if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingSingleSpeed) { // COIL:DX:COOLINGBYPASSFACTOREMPIRICAL
                     this->m_CompPartLoadRatio = PartLoadFrac;
 
-                    DXCoils::SimDXCoil(CompName, On, FirstHVACIteration, this->m_CoolingCoilIndex, FanOpMode, PartLoadFrac);
+                    DXCoils::SimDXCoil(outputFiles, CompName, On, FirstHVACIteration, this->m_CoolingCoilIndex,
+                                       FanOpMode, PartLoadFrac, Optional<const Real64>(), Optional<const Real64>(),
+                                       Optional<const Real64>(), Optional<const Real64>());
 
                 } else if ((CoilType_Num == DataHVACGlobals::CoilDX_CoolingHXAssisted) ||
                            (CoilType_Num == DataHVACGlobals::CoilWater_CoolingHXAssisted)) { // CoilSystem:Cooling:DX:HeatExchangerAssisted
 
                     if (this->CoolCoilFluidInletNode > 0) DataLoopNode::Node(this->CoolCoilFluidInletNode).MassFlowRate = 0.0;
 
-                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(
-                        CompName, FirstHVACIteration, On, PartLoadFrac, this->m_CoolingCoilIndex, FanOpMode, HXUnitOn, _, economizerFlag);
+                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles,
+                                                                        CompName, FirstHVACIteration, On, PartLoadFrac,
+                                                                        this->m_CoolingCoilIndex, FanOpMode, HXUnitOn,
+                                                                        _, economizerFlag, Optional<Real64>());
                     if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingHXAssisted) this->m_CompPartLoadRatio = PartLoadFrac;
                 } else if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingTwoSpeed) {
 
-                    DXCoils::SimDXCoilMultiSpeed(CompName, 0.0, PartLoadFrac, this->m_CoolingCoilIndex);
+                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 0.0, PartLoadFrac, this->m_CoolingCoilIndex,
+                                                 ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const(),
+                                                 ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const());
 
                 } else if (CoilType_Num == DataHVACGlobals::CoilDX_MultiSpeedCooling) {
 
@@ -10578,7 +10623,7 @@ namespace UnitarySystems {
 
                 } else if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingTwoStageWHumControl) {
 
-                    DXCoils::SimDXCoilMultiMode(CompName, On, FirstHVACIteration, PartLoadFrac, DehumidMode, this->m_CoolingCoilIndex, FanOpMode);
+                    DXCoils::SimDXCoilMultiMode(m_outputFiles, CompName, On, FirstHVACIteration, PartLoadFrac, DehumidMode, this->m_CoolingCoilIndex, FanOpMode);
                     this->m_CompPartLoadRatio = PartLoadFrac;
                 } else if ((CoilType_Num == DataHVACGlobals::Coil_CoolingWater) ||
                            (CoilType_Num == DataHVACGlobals::Coil_CoolingWaterDetailed)) { // COIL:COOLING:WATER
@@ -10628,7 +10673,8 @@ namespace UnitarySystems {
 
                 } else if (CoilType_Num == DataHVACGlobals::CoilDX_PackagedThermalStorageCooling) {
 
-                    PackagedThermalStorageCoil::SimTESCoil(CompName, this->m_CoolingCoilIndex, FanOpMode, this->m_TESOpMode, PartLoadFrac);
+                    PackagedThermalStorageCoil::SimTESCoil(outputFiles, CompName, this->m_CoolingCoilIndex,
+                                                           FanOpMode, this->m_TESOpMode, PartLoadFrac);
 
                 } else {
                 }
@@ -10655,7 +10701,9 @@ namespace UnitarySystems {
 
                     if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingSingleSpeed) { // COIL:DX:COOLINGBYPASSFACTOREMPIRICAL
 
-                        DXCoils::SimDXCoil(CompName, On, FirstHVACIteration, this->m_CoolingCoilIndex, FanOpMode, PartLoadFrac);
+                        DXCoils::SimDXCoil(outputFiles, CompName, On, FirstHVACIteration, this->m_CoolingCoilIndex,
+                                           FanOpMode, PartLoadFrac, Optional<const Real64>(), Optional<const Real64>(),
+                                           Optional<const Real64>(), Optional<const Real64>());
                         this->m_CompPartLoadRatio = PartLoadFrac;
 
                     } else if ((CoilType_Num == DataHVACGlobals::CoilDX_CoolingHXAssisted) ||
@@ -10663,8 +10711,11 @@ namespace UnitarySystems {
 
                         if (this->CoolCoilFluidInletNode > 0)
                             DataLoopNode::Node(this->CoolCoilFluidInletNode).MassFlowRate = max(0.0, this->MaxCoolCoilFluidFlow);
-                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(
-                            CompName, FirstHVACIteration, On, PartLoadFrac, this->m_CoolingCoilIndex, FanOpMode, HXUnitOn, _, economizerFlag);
+                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles,
+                                                                            CompName, FirstHVACIteration, On,
+                                                                            PartLoadFrac, this->m_CoolingCoilIndex,
+                                                                            FanOpMode, HXUnitOn, _, economizerFlag,
+                                                                            Optional<Real64>());
 
                         if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingHXAssisted) this->m_CompPartLoadRatio = PartLoadFrac;
 
@@ -10673,7 +10724,11 @@ namespace UnitarySystems {
                         CycRatio = 1.0;
                         for (SpeedNum = 1; SpeedNum <= this->m_NumOfSpeedCooling; ++SpeedNum) {
                             SpeedRatio = double(SpeedNum) - 1.0;
-                            DXCoils::SimDXCoilMultiSpeed(CompName, SpeedRatio, CycRatio, this->m_CoolingCoilIndex);
+                            DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, SpeedRatio, CycRatio,
+                                                         this->m_CoolingCoilIndex, ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const());
                             OutletTemp = DXCoils::DXCoilOutletTemp(this->m_CoolingCoilIndex);
                             if (OutletTemp < DesOutTemp && SensibleLoad) break; // this isn't going to work IF dehumidIFying
                         }
@@ -10722,7 +10777,7 @@ namespace UnitarySystems {
                     } else if (CoilType_Num ==
                                DataHVACGlobals::CoilDX_CoolingTwoStageWHumControl) { // Coil:Cooling:DX:TwoStageWithHumidityControlMode
 
-                        DXCoils::SimDXCoilMultiMode(CompName, On, FirstHVACIteration, PartLoadFrac, DehumidMode, this->m_CoolingCoilIndex, FanOpMode);
+                        DXCoils::SimDXCoilMultiMode(m_outputFiles, CompName, On, FirstHVACIteration, PartLoadFrac, DehumidMode, this->m_CoolingCoilIndex, FanOpMode);
                         this->m_CompPartLoadRatio = PartLoadFrac;
 
                     } else if ((CoilType_Num == DataHVACGlobals::Coil_CoolingWater) ||
@@ -10788,7 +10843,8 @@ namespace UnitarySystems {
                             PartLoadFrac = 0.0;
                         } else {
                             // Get full load result
-                            PackagedThermalStorageCoil::SimTESCoil(CompName, this->m_CoolingCoilIndex, FanOpMode, this->m_TESOpMode, PartLoadFrac);
+                            PackagedThermalStorageCoil::SimTESCoil(outputFiles, CompName, this->m_CoolingCoilIndex,
+                                                                   FanOpMode, this->m_TESOpMode, PartLoadFrac);
                         }
 
                     } else {
@@ -10857,7 +10913,7 @@ namespace UnitarySystems {
                                 while ((TempOutletTempDXCoil - DesOutTemp) > 0.0 && TempMaxPLR <= 1.0) {
                                     //                   find upper limit of PLR
                                     TempMaxPLR += 0.1;
-                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(CompName,
+                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles, CompName,
                                                                                         FirstHVACIteration,
                                                                                         On,
                                                                                         TempMaxPLR,
@@ -10865,7 +10921,8 @@ namespace UnitarySystems {
                                                                                         FanOpMode,
                                                                                         HXUnitOn,
                                                                                         _,
-                                                                                        economizerFlag);
+                                                                                        economizerFlag,
+                                                                                        Optional<Real64>());
                                     TempOutletTempDXCoil = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletTemp(this->m_CoolingCoilIndex);
                                 }
                                 TempMinPLR = TempMaxPLR;
@@ -10874,7 +10931,7 @@ namespace UnitarySystems {
                                     TempMaxPLR = TempMinPLR;
                                     // find minimum limit of PLR
                                     TempMinPLR -= 0.01;
-                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(CompName,
+                                    HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles, CompName,
                                                                                         FirstHVACIteration,
                                                                                         On,
                                                                                         TempMinPLR,
@@ -10882,7 +10939,8 @@ namespace UnitarySystems {
                                                                                         FanOpMode,
                                                                                         HXUnitOn,
                                                                                         _,
-                                                                                        economizerFlag);
+                                                                                        economizerFlag,
+                                                                                        Optional<Real64>());
                                     TempOutletTempDXCoil = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletTemp(this->m_CoolingCoilIndex);
                                 }
                                 // Relax boundary slightly to assure a solution can be found using RegulaFalsi (i.e. one boundary may
@@ -11032,7 +11090,7 @@ namespace UnitarySystems {
                             // dehumidification mode = 0 for normal mode, 1+ for enhanced mode
                             Par[3] = double(DehumidMode);
                             Par[4] = double(FanOpMode);
-                            General::SolveRoot(Acc, MaxIte, SolFla, PartLoadFrac, &this->multiModeDXCoilResidual, 0.0, 1.0, Par);
+                            General::SolveRoot(Acc, MaxIte, SolFla, PartLoadFrac, General::callback(outputFiles, multiModeDXCoilResidual), 0.0, 1.0, Par);
                             this->m_CompPartLoadRatio = PartLoadFrac;
 
                         } else if ((CoilType_Num == DataHVACGlobals::Coil_CoolingWater) ||
@@ -11101,8 +11159,11 @@ namespace UnitarySystems {
                         // Determine required part load when heat exchanger is ON
                         HXUnitOn = true;
                         PartLoadFrac = 1.0;
-                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(
-                            CompName, FirstHVACIteration, On, PartLoadFrac, this->m_CoolingCoilIndex, FanOpMode, HXUnitOn, _, economizerFlag);
+                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles,
+                                                                            CompName, FirstHVACIteration, On,
+                                                                            PartLoadFrac, this->m_CoolingCoilIndex,
+                                                                            FanOpMode, HXUnitOn, _, economizerFlag,
+                                                                            Optional<Real64>());
 
                         OutletTempDXCoil = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletTemp(this->m_CoolingCoilIndex);
 
@@ -11147,7 +11208,7 @@ namespace UnitarySystems {
                         PartLoadFrac = 1.0;
                         DehumidMode = 1;
                         this->m_DehumidificationMode = DehumidMode;
-                        DXCoils::SimDXCoilMultiMode(CompName, On, FirstHVACIteration, PartLoadFrac, DehumidMode, this->m_CoolingCoilIndex, FanOpMode);
+                        DXCoils::SimDXCoilMultiMode(m_outputFiles, CompName, On, FirstHVACIteration, PartLoadFrac, DehumidMode, this->m_CoolingCoilIndex, FanOpMode);
                         FullOutput = DataLoopNode::Node(InletNode).MassFlowRate *
                                      (Psychrometrics::PsyHFnTdbW(DataLoopNode::Node(OutletNode).Temp, DataLoopNode::Node(InletNode).HumRat) -
                                       Psychrometrics::PsyHFnTdbW(DataLoopNode::Node(InletNode).Temp, DataLoopNode::Node(InletNode).HumRat));
@@ -11179,7 +11240,7 @@ namespace UnitarySystems {
                                 // dehumidification mode = 0 for normal mode, 1+ for enhanced mode
                                 Par[3] = double(DehumidMode);
                                 Par[4] = double(FanOpMode);
-                                General::SolveRoot(Acc, MaxIte, SolFla, PartLoadFrac, this->multiModeDXCoilHumRatResidual, 0.0, 1.0, Par);
+                                General::SolveRoot(Acc, MaxIte, SolFla, PartLoadFrac, General::callback(outputFiles, multiModeDXCoilHumRatResidual), 0.0, 1.0, Par);
                             } else { // must be a sensible load so find PLR
                                 PartLoadFrac = ReqOutput / FullOutput;
                                 Par[1] = double(this->m_CoolingCoilIndex);
@@ -11187,7 +11248,7 @@ namespace UnitarySystems {
                                 // Dehumidification mode = 0 for normal mode, 1+ for enhanced mode
                                 Par[3] = double(DehumidMode);
                                 Par[4] = double(FanOpMode);
-                                General::SolveRoot(Acc, MaxIte, SolFla, PartLoadFrac, this->multiModeDXCoilResidual, 0.0, 1.0, Par);
+                                General::SolveRoot(Acc, MaxIte, SolFla, PartLoadFrac, General::callback(outputFiles, multiModeDXCoilResidual), 0.0, 1.0, Par);
                             }
                         }
                         this->m_CompPartLoadRatio = PartLoadFrac;
@@ -11259,7 +11320,7 @@ namespace UnitarySystems {
                                     while ((OutletHumRatDXCoil - TempOutletHumRatDXCoil) >= 0.0 && TempMaxPLR <= 1.0) {
                                         //                     find upper limit of LatentPLR
                                         TempMaxPLR += 0.1;
-                                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(CompName,
+                                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles, CompName,
                                                                                             FirstHVACIteration,
                                                                                             On,
                                                                                             TempMaxPLR,
@@ -11267,7 +11328,8 @@ namespace UnitarySystems {
                                                                                             FanOpMode,
                                                                                             HXUnitOn,
                                                                                             _,
-                                                                                            economizerFlag);
+                                                                                            economizerFlag,
+                                                                                            Optional<Real64>());
                                         OutletHumRatDXCoil = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletHumRat(this->m_CoolingCoilIndex);
                                     }
                                     TempMinPLR = TempMaxPLR;
@@ -11277,7 +11339,7 @@ namespace UnitarySystems {
                                         TempMaxPLR = TempMinPLR;
                                         //                     find minimum limit of Latent PLR
                                         TempMinPLR -= 0.01;
-                                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(CompName,
+                                        HVACHXAssistedCoolingCoil::SimHXAssistedCoolingCoil(outputFiles, CompName,
                                                                                             FirstHVACIteration,
                                                                                             On,
                                                                                             TempMaxPLR,
@@ -11285,7 +11347,8 @@ namespace UnitarySystems {
                                                                                             FanOpMode,
                                                                                             HXUnitOn,
                                                                                             _,
-                                                                                            economizerFlag);
+                                                                                            economizerFlag,
+                                                                                            Optional<Real64>());
                                         OutletHumRatDXCoil = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletHumRat(this->m_CoolingCoilIndex);
                                     }
                                     //                   tighter boundary of solution has been found, CALL RegulaFalsi a second time
@@ -11365,7 +11428,11 @@ namespace UnitarySystems {
                         } else if (CoilType_Num == DataHVACGlobals::CoilDX_CoolingTwoSpeed) {
 
                             //               Simulate MultiSpeed DX coil at sensible result
-                            DXCoils::SimDXCoilMultiSpeed(CompName, SpeedRatio, CycRatio, this->m_CoolingCoilIndex);
+                            DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, SpeedRatio, CycRatio,
+                                                         this->m_CoolingCoilIndex, ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const());
 
                             OutletHumRatDXCoil = DXCoils::DXCoilOutletHumRat(this->m_CoolingCoilIndex);
                             // IF humidity setpoint is not satisfied and humidity control type is CoolReheat,
@@ -11376,11 +11443,20 @@ namespace UnitarySystems {
                                 CycRatio = 0.0;
                                 SpeedRatio = 0.0;
 
-                                DXCoils::SimDXCoilMultiSpeed(CompName, 0.0, 1.0, this->m_CoolingCoilIndex);
+                                DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 0.0, 1.0,
+                                                             this->m_CoolingCoilIndex, ObjexxFCL::Optional_int_const(),
+                                                             ObjexxFCL::Optional_int_const(),
+                                                             ObjexxFCL::Optional_int_const(),
+                                                             ObjexxFCL::Optional_int_const());
                                 OutletHumRatLS = DXCoils::DXCoilOutletHumRat(this->m_CoolingCoilIndex);
                                 if (OutletHumRatLS > DesOutHumRat) {
                                     CycRatio = 1.0;
-                                    DXCoils::SimDXCoilMultiSpeed(CompName, 1.0, 1.0, this->m_CoolingCoilIndex);
+                                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 1.0, 1.0,
+                                                                 this->m_CoolingCoilIndex,
+                                                                 ObjexxFCL::Optional_int_const(),
+                                                                 ObjexxFCL::Optional_int_const(),
+                                                                 ObjexxFCL::Optional_int_const(),
+                                                                 ObjexxFCL::Optional_int_const());
                                     OutletHumRatHS = DXCoils::DXCoilOutletHumRat(this->m_CoolingCoilIndex);
                                     if (OutletHumRatHS < DesOutHumRat) {
                                         Par[1] = double(this->m_CoolingCoilIndex);
@@ -11399,7 +11475,11 @@ namespace UnitarySystems {
 
                         } else if (CoilType_Num == DataHVACGlobals::CoilDX_MultiSpeedCooling) {
 
-                            DXCoils::SimDXCoilMultiSpeed(CompName, SpeedRatio, CycRatio, this->m_CoolingCoilIndex);
+                            DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, SpeedRatio, CycRatio,
+                                                         this->m_CoolingCoilIndex, ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const(),
+                                                         ObjexxFCL::Optional_int_const());
                             OutletHumRatDXCoil = DXCoils::DXCoilOutletHumRat(this->m_CoolingCoilIndex);
 
                             // IF humidity setpoint is not satisfied and humidity control type is CoolReheat,
@@ -11410,11 +11490,20 @@ namespace UnitarySystems {
                                 CycRatio = 0.0;
                                 SpeedRatio = 0.0;
 
-                                DXCoils::SimDXCoilMultiSpeed(CompName, 0.0, 1.0, this->m_CoolingCoilIndex);
+                                DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 0.0, 1.0,
+                                                             this->m_CoolingCoilIndex, ObjexxFCL::Optional_int_const(),
+                                                             ObjexxFCL::Optional_int_const(),
+                                                             ObjexxFCL::Optional_int_const(),
+                                                             ObjexxFCL::Optional_int_const());
                                 OutletHumRatLS = DXCoils::DXCoilOutletHumRat(this->m_CoolingCoilIndex);
                                 if (OutletHumRatLS > DesOutHumRat) {
                                     CycRatio = 1.0;
-                                    DXCoils::SimDXCoilMultiSpeed(CompName, 1.0, 1.0, this->m_CoolingCoilIndex);
+                                    DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 1.0, 1.0,
+                                                                 this->m_CoolingCoilIndex,
+                                                                 ObjexxFCL::Optional_int_const(),
+                                                                 ObjexxFCL::Optional_int_const(),
+                                                                 ObjexxFCL::Optional_int_const(),
+                                                                 ObjexxFCL::Optional_int_const());
                                     OutletHumRatHS = DXCoils::DXCoilOutletHumRat(this->m_CoolingCoilIndex);
                                     if (OutletHumRatHS < DesOutHumRat) {
                                         Par[1] = double(this->m_CoolingCoilIndex);
@@ -11498,7 +11587,7 @@ namespace UnitarySystems {
                             // dehumidification mode = 0 for normal mode, 1+ for enhanced mode
                             Par[3] = double(DehumidMode);
                             Par[4] = double(FanOpMode);
-                            General::SolveRoot(Acc, MaxIte, SolFlaLat, PartLoadFrac, this->multiModeDXCoilHumRatResidual, 0.0, 1.0, Par);
+                            General::SolveRoot(Acc, MaxIte, SolFlaLat, PartLoadFrac, General::callback(outputFiles, multiModeDXCoilHumRatResidual), 0.0, 1.0, Par);
                             this->m_CompPartLoadRatio = PartLoadFrac;
 
                         } else if ((CoilType_Num == DataHVACGlobals::Coil_CoolingWater) ||
@@ -11788,7 +11877,9 @@ namespace UnitarySystems {
 
                     if (SELECT_CASE_var == DataHVACGlobals::CoilDX_HeatingEmpirical) {
 
-                        DXCoils::SimDXCoil(CompName, On, FirstHVACIteration, CompIndex, FanOpMode, PartLoadFrac);
+                        DXCoils::SimDXCoil(outputFiles, CompName, On, FirstHVACIteration, CompIndex, FanOpMode,
+                                           PartLoadFrac, Optional<const Real64>(), Optional<const Real64>(),
+                                           Optional<const Real64>(), Optional<const Real64>());
                         this->m_CompPartLoadRatio = PartLoadFrac;
 
                     } else if (SELECT_CASE_var == DataHVACGlobals::Coil_UserDefined) { // do nothing, user defined coil cannot be controlled
@@ -11900,7 +11991,10 @@ namespace UnitarySystems {
 
                         if (SELECT_CASE_var == DataHVACGlobals::CoilDX_HeatingEmpirical) { // Coil:Heating:DX:SingleSpeed
 
-                            DXCoils::SimDXCoil(CompName, On, FirstHVACIteration, this->m_HeatingCoilIndex, FanOpMode, PartLoadFrac);
+                            DXCoils::SimDXCoil(outputFiles, CompName, On, FirstHVACIteration,
+                                               this->m_HeatingCoilIndex, FanOpMode, PartLoadFrac,
+                                               Optional<const Real64>(), Optional<const Real64>(),
+                                               Optional<const Real64>(), Optional<const Real64>());
                             this->m_CompPartLoadRatio = PartLoadFrac;
 
                         } else if (SELECT_CASE_var == DataHVACGlobals::Coil_UserDefined) {
@@ -12739,7 +12833,8 @@ namespace UnitarySystems {
                     }
                 }
             }
-            DXCoils::SimDXCoilMultiSpeed(CompName, 0.0, PartLoadFrac, CompIndex, SpeedNum, this->m_FanOpMode, 1, this->m_SingleMode);
+            DXCoils::SimDXCoilMultiSpeed(outputFiles, CompName, 0.0, PartLoadFrac, CompIndex, SpeedNum,
+                                         this->m_FanOpMode, 1, this->m_SingleMode);
 
         } else if (CoilTypeNum == DataHVACGlobals::Coil_CoolingAirToAirVariableSpeed) {
 
@@ -13530,7 +13625,10 @@ namespace UnitarySystems {
         if (thisSys.CoolCoilFluidInletNode > 0) {
             DataLoopNode::Node(thisSys.CoolCoilFluidInletNode).MassFlowRate = thisSys.MaxCoolCoilFluidFlow * PartLoadRatio;
         }
-        HVACHXAssistedCoolingCoil::CalcHXAssistedCoolingCoil(CoilIndex, FirstHVACIteration, On, PartLoadRatio, HXUnitOn, FanOpMode);
+        HVACHXAssistedCoolingCoil::CalcHXAssistedCoolingCoil(outputFiles, CoilIndex, FirstHVACIteration, On,
+                                                             PartLoadRatio, HXUnitOn, FanOpMode,
+                                                             Optional<const Real64>(),
+                                                             ObjexxFCL::Optional_bool_const());
         Real64 OutletAirTemp = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletTemp(CoilIndex);
         Residuum = Par[2] - OutletAirTemp;
         return Residuum;
@@ -13567,8 +13665,9 @@ namespace UnitarySystems {
         bool FirstHVACIteration = (Par[3] > 0.0);
         bool HXUnitOn = (Par[4] == 1.0);
         int FanOpMode = int(Par[5]);
-        HVACHXAssistedCoolingCoil::CalcHXAssistedCoolingCoil(
-            CoilIndex, FirstHVACIteration, On, PartLoadRatio, HXUnitOn, FanOpMode, _, economizerFlag);
+        HVACHXAssistedCoolingCoil::CalcHXAssistedCoolingCoil(outputFiles,
+                                                             CoilIndex, FirstHVACIteration, On, PartLoadRatio, HXUnitOn,
+                                                             FanOpMode, _, economizerFlag);
         Real64 OutletAirHumRat = HVACHXAssistedCoolingCoil::HXAssistedCoilOutletHumRat(CoilIndex);
         Residuum = Par[2] - OutletAirHumRat;
         return Residuum;
@@ -14231,8 +14330,9 @@ namespace UnitarySystems {
         Real64 DesiredOutletTemp = Par[2];
         Real64 DesiredOutletHumRat = Par[3];
 
-        PackagedThermalStorageCoil::SimTESCoil(
-            thisSys.m_CoolingCoilName, thisSys.m_CoolingCoilIndex, thisSys.m_FanOpMode, thisSys.m_TESOpMode, PartLoadRatio);
+        PackagedThermalStorageCoil::SimTESCoil(outputFiles,
+                                               thisSys.m_CoolingCoilName, thisSys.m_CoolingCoilIndex,
+                                               thisSys.m_FanOpMode, thisSys.m_TESOpMode, PartLoadRatio);
 
         if (DesiredOutletHumRat > 0.0) {
             OutletAirHumRat = DataLoopNode::Node(thisSys.CoolCoilOutletNodeNum).HumRat;
@@ -14245,7 +14345,8 @@ namespace UnitarySystems {
         return Residuum;
     }
 
-    Real64 UnitarySys::multiModeDXCoilResidual(Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
+    Real64 UnitarySys::multiModeDXCoilResidual(OutputFiles &outputFiles,
+                                               Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
                                                std::vector<Real64> const &Par // par(1) = DX coil number
     )
     {
@@ -14280,16 +14381,15 @@ namespace UnitarySystems {
         CoilIndex = int(Par[1]);
         DehumidMode = int(Par[3]);
         FanOpMode = int(Par[4]);
-        DXCoils::SimDXCoilMultiMode("", On, false, PartLoadRatio, DehumidMode, CoilIndex, FanOpMode);
+        DXCoils::SimDXCoilMultiMode(outputFiles, "", On, false, PartLoadRatio, DehumidMode, CoilIndex, FanOpMode);
         OutletAirTemp = DXCoils::DXCoilOutletTemp(CoilIndex);
         Residuum = Par[2] - OutletAirTemp;
 
         return Residuum;
     }
 
-    Real64 UnitarySys::multiModeDXCoilHumRatResidual(Real64 const PartLoadRatio,    // compressor cycling ratio (1.0 is continuous, 0.0 is off)
-                                                     std::vector<Real64> const &Par // par(1) = DX coil number
-    )
+    Real64 UnitarySys::multiModeDXCoilHumRatResidual(OutputFiles &outputFiles, Real64 const PartLoadRatio,
+                                                     std::vector<Real64> const &Par)
     {
 
         // FUNCTION INFORMATION:
@@ -14315,7 +14415,7 @@ namespace UnitarySystems {
         int CoilIndex = int(Par[1]);
         int DehumidMode = int(Par[3]);
         int FanOpMode = int(Par[4]);
-        DXCoils::SimDXCoilMultiMode("", On, false, PartLoadRatio, DehumidMode, CoilIndex, FanOpMode);
+        DXCoils::SimDXCoilMultiMode(outputFiles, "", On, false, PartLoadRatio, DehumidMode, CoilIndex, FanOpMode);
         Real64 OutletAirHumRat = DXCoils::DXCoilOutletHumRat(CoilIndex);
         Residuum = Par[2] - OutletAirHumRat;
 
@@ -15023,7 +15123,8 @@ namespace UnitarySystems {
         this->setAverageAirFlow(PartLoadRatio, OnOffAirFlowRatio);
     }
 
-    void UnitarySys::checkUnitarySysCoilInOASysExists(std::string const &UnitarySysName, int const ZoneOAUnitNum)
+    void UnitarySys::checkUnitarySysCoilInOASysExists(OutputFiles &outputFiles, std::string const &UnitarySysName,
+                                                      int const ZoneOAUnitNum)
     {
 
         // SUBROUTINE INFORMATION:
@@ -15042,7 +15143,7 @@ namespace UnitarySystems {
 
         // SUBROUTINE LOCAL VARIABLE DECLARATIONS:
         if (UnitarySystems::getInputOnceFlag) {
-            getUnitarySystemInput(UnitarySysName, false, ZoneOAUnitNum);
+            getUnitarySystemInput(outputFiles, UnitarySysName, false, ZoneOAUnitNum);
             UnitarySystems::getInputOnceFlag = false;
         }
 
@@ -15050,7 +15151,7 @@ namespace UnitarySystems {
         if (numUnitarySystems > 0) {
             for (int UnitarySysNum = 0; UnitarySysNum < numUnitarySystems; ++UnitarySysNum) {
                 if (UtilityRoutines::SameString(UnitarySysName, unitarySys[UnitarySysNum].Name)) {
-                    if (unitarySys[UnitarySysNum].m_ThisSysInputShouldBeGotten) getUnitarySystemInput(UnitarySysName, false, ZoneOAUnitNum);
+                    if (unitarySys[UnitarySysNum].m_ThisSysInputShouldBeGotten) getUnitarySystemInput(outputFiles, UnitarySysName, false, ZoneOAUnitNum);
                     if (unitarySys[UnitarySysNum].m_ISHundredPercentDOASDXCoil) {
                         if (!(unitarySys[UnitarySysNum].m_CoolingCoilType_Num == DataHVACGlobals::Coil_CoolingAirToAirVariableSpeed ||
                               unitarySys[UnitarySysNum].m_CoolingCoilType_Num == DataHVACGlobals::Coil_CoolingWaterToAirHPVSEquationFit)) {
@@ -15069,7 +15170,8 @@ namespace UnitarySystems {
         }
     }
 
-    void UnitarySys::getUnitarySysHeatCoolCoil(std::string const &UnitarySysName, // Name of Unitary System object
+    void UnitarySys::getUnitarySysHeatCoolCoil(OutputFiles &outputFiles,
+                                               std::string const &UnitarySysName, // Name of Unitary System object
                                                bool &CoolingCoil,                 // Cooling coil exists
                                                bool &HeatingCoil,                 // Heating coil exists
                                                int const ZoneOAUnitNum            // index to zone OA unit
@@ -15084,13 +15186,13 @@ namespace UnitarySystems {
         // Determined weather Unitary system has heating or cooling coils
 
         if (UnitarySystems::getInputOnceFlag) {
-            getUnitarySystemInput(UnitarySysName, false, ZoneOAUnitNum);
+            getUnitarySystemInput(outputFiles, UnitarySysName, false, ZoneOAUnitNum);
             UnitarySystems::getInputOnceFlag = false;
         }
 
         for (int UnitarySysNum = 0; UnitarySysNum < numUnitarySystems; ++UnitarySysNum) {
             if (UtilityRoutines::SameString(UnitarySysName, unitarySys[UnitarySysNum].Name)) {
-                if (unitarySys[UnitarySysNum].m_ThisSysInputShouldBeGotten) getUnitarySystemInput(UnitarySysName, false, ZoneOAUnitNum);
+                if (unitarySys[UnitarySysNum].m_ThisSysInputShouldBeGotten) getUnitarySystemInput(outputFiles, UnitarySysName, false, ZoneOAUnitNum);
                 if (unitarySys[UnitarySysNum].m_CoolCoilExists) {
                     CoolingCoil = true;
                 }

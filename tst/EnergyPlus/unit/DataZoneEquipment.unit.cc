@@ -81,8 +81,8 @@ TEST_F(EnergyPlusFixture, DataZoneEquipment_TestGetSystemNodeNumberForZone)
 
     ZoneEquipInputsFilled = true;
 
-    EXPECT_EQ(0, GetSystemNodeNumberForZone("NonExistingZone"));
-    EXPECT_EQ(1, GetSystemNodeNumberForZone("Zone1"));
+    EXPECT_EQ(0, GetSystemNodeNumberForZone(outputFiles, "NonExistingZone"));
+    EXPECT_EQ(1, GetSystemNodeNumberForZone(outputFiles, "Zone1"));
 
     ZoneEquipConfig.deallocate();
 }

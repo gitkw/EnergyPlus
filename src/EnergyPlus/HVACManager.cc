@@ -221,7 +221,7 @@ namespace HVACManager {
         ReportAirHeatBalanceFirstTimeFlag = true;
     }
 
-    void ManageHVAC()
+    void ManageHVAC(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -416,12 +416,12 @@ namespace HVACManager {
 
         if (Contaminant.SimulateContaminants) ManageZoneContaminanUpdates(iPredictStep, ShortenTimeStepSys, UseZoneTimeStepHistory, PriorTimeStep);
 
-        SimHVAC();
+        SimHVAC(outputFiles);
 
         if (AnyIdealCondEntSetPointInModel && MetersHaveBeenInitialized && !WarmupFlag) {
             RunOptCondEntTemp = true;
             while (RunOptCondEntTemp) {
-                SimHVAC();
+                SimHVAC(outputFiles);
             }
         }
 
@@ -429,7 +429,7 @@ namespace HVACManager {
 
         // Only simulate once per zone timestep; must be after SimHVAC
         if (FirstTimeStepSysFlag && MetersHaveBeenInitialized) {
-            ManageDemand();
+            ManageDemand(outputFiles);
         }
 
         BeginTimeStepFlag = false; // At this point, we have been through the first pass through SimHVAC so this needs to be set
@@ -470,12 +470,12 @@ namespace HVACManager {
 
                 if (Contaminant.SimulateContaminants)
                     ManageZoneContaminanUpdates(iPredictStep, ShortenTimeStepSys, UseZoneTimeStepHistory, PriorTimeStep);
-                SimHVAC();
+                SimHVAC(outputFiles);
 
                 if (AnyIdealCondEntSetPointInModel && MetersHaveBeenInitialized && !WarmupFlag) {
                     RunOptCondEntTemp = true;
                     while (RunOptCondEntTemp) {
-                        SimHVAC();
+                        SimHVAC(outputFiles);
                     }
                 }
 
@@ -647,7 +647,7 @@ namespace HVACManager {
         }
     }
 
-    void SimHVAC()
+    void SimHVAC(OutputFiles &outputFiles)
     {
 
         // SUBROUTINE INFORMATION:
@@ -811,7 +811,7 @@ namespace HVACManager {
         }
 
         if (ZoneSizingCalc) {
-            ManageZoneEquipment(FirstHVACIteration, SimZoneEquipmentFlag, SimAirLoopsFlag);
+            ManageZoneEquipment(outputFiles, FirstHVACIteration, SimZoneEquipmentFlag, SimAirLoopsFlag);
             // need to call non zone equipment so water use zone gains can be included in sizing calcs
             ManageNonZoneEquipment(FirstHVACIteration, SimNonZoneEquipmentFlag);
             facilityElectricServiceObj->manageElectricPowerService(FirstHVACIteration, SimElecCircuitsFlag, false);
@@ -844,7 +844,7 @@ namespace HVACManager {
         // first explicitly call each system type with FirstHVACIteration,
 
         // Manages the various component simulations
-        SimSelectedEquipment(SimAirLoopsFlag,
+        SimSelectedEquipment(outputFiles, SimAirLoopsFlag,
                              SimZoneEquipmentFlag,
                              SimNonZoneEquipmentFlag,
                              SimPlantLoopsFlag,
@@ -870,7 +870,7 @@ namespace HVACManager {
             ManageEMS(emsCallFromHVACIterationLoop, anyEMSRan); // calling point id
 
             // Manages the various component simulations
-            SimSelectedEquipment(SimAirLoopsFlag,
+            SimSelectedEquipment(outputFiles, SimAirLoopsFlag,
                                  SimZoneEquipmentFlag,
                                  SimNonZoneEquipmentFlag,
                                  SimPlantLoopsFlag,
@@ -904,7 +904,7 @@ namespace HVACManager {
                 SimNonZoneEquipmentFlag = false;
                 SimPlantLoopsFlag = true;
                 SimElecCircuitsFlag = false;
-                SimSelectedEquipment(SimAirLoopsFlag,
+                SimSelectedEquipment(outputFiles, SimAirLoopsFlag,
                                      SimZoneEquipmentFlag,
                                      SimNonZoneEquipmentFlag,
                                      SimPlantLoopsFlag,
@@ -917,7 +917,7 @@ namespace HVACManager {
                 SimNonZoneEquipmentFlag = true;
                 SimPlantLoopsFlag = false;
                 SimElecCircuitsFlag = true;
-                SimSelectedEquipment(SimAirLoopsFlag,
+                SimSelectedEquipment(outputFiles, SimAirLoopsFlag,
                                      SimZoneEquipmentFlag,
                                      SimNonZoneEquipmentFlag,
                                      SimPlantLoopsFlag,
@@ -931,7 +931,7 @@ namespace HVACManager {
                 SimNonZoneEquipmentFlag = false;
                 SimPlantLoopsFlag = true;
                 SimElecCircuitsFlag = false;
-                SimSelectedEquipment(SimAirLoopsFlag,
+                SimSelectedEquipment(outputFiles, SimAirLoopsFlag,
                                      SimZoneEquipmentFlag,
                                      SimNonZoneEquipmentFlag,
                                      SimPlantLoopsFlag,
@@ -944,7 +944,7 @@ namespace HVACManager {
                 SimNonZoneEquipmentFlag = true;
                 SimPlantLoopsFlag = false;
                 SimElecCircuitsFlag = true;
-                SimSelectedEquipment(SimAirLoopsFlag,
+                SimSelectedEquipment(outputFiles, SimAirLoopsFlag,
                                      SimZoneEquipmentFlag,
                                      SimNonZoneEquipmentFlag,
                                      SimPlantLoopsFlag,
@@ -1719,13 +1719,10 @@ namespace HVACManager {
         }
     }
 
-    void SimSelectedEquipment(bool &SimAirLoops,         // True when the air loops need to be (re)simulated
-                              bool &SimZoneEquipment,    // True when zone equipment components need to be (re)simulated
-                              bool &SimNonZoneEquipment, // True when non-zone equipment components need to be (re)simulated
-                              bool &SimPlantLoops,       // True when the main plant loops need to be (re)simulated
-                              bool &SimElecCircuits,     // True when electric circuits need to be (re)simulated
-                              bool &FirstHVACIteration,  // True when solution technique on first iteration
-                              bool const LockPlantFlows)
+    void
+    SimSelectedEquipment(OutputFiles &outputFiles, bool &SimAirLoops, bool &SimZoneEquipment, bool &SimNonZoneEquipment,
+                         bool &SimPlantLoops, bool &SimElecCircuits, bool &FirstHVACIteration,
+                         bool const LockPlantFlows)
     {
 
         // SUBROUTINE INFORMATION:
@@ -1796,7 +1793,7 @@ namespace HVACManager {
             // determination of which zones are connected to which air loops.
             // This call of ManageZoneEquipment does nothing except force the
             // zone equipment data to be read in.
-            ManageZoneEquipment(FirstHVACIteration, SimZoneEquipment, SimAirLoops);
+            ManageZoneEquipment(outputFiles, FirstHVACIteration, SimZoneEquipment, SimAirLoops);
             MyEnvrnFlag = false;
         }
         if (!BeginEnvrnFlag) {
@@ -1809,13 +1806,13 @@ namespace HVACManager {
             if (AirflowNetwork::SimulateAirflowNetwork > AirflowNetwork::AirflowNetworkControlSimple) {
                 ManageAirflowNetworkBalance(FirstHVACIteration);
             }
-            ManageAirLoops(FirstHVACIteration, SimAirLoops, SimZoneEquipment);
+            ManageAirLoops(outputFiles, FirstHVACIteration, SimAirLoops, SimZoneEquipment);
             AirLoopInputsFilled = true; // all air loop inputs have been read in
             SimAirLoops = true;         // Need to make sure that SimAirLoop is simulated at min twice to calculate PLR in some air loop equipment
             AirLoopsSimOnce = true;     // air loops simulated once for this environment
             ResetTerminalUnitFlowLimits();
             FlowMaxAvailAlreadyReset = true;
-            ManageZoneEquipment(FirstHVACIteration, SimZoneEquipment, SimAirLoops);
+            ManageZoneEquipment(outputFiles, FirstHVACIteration, SimZoneEquipment, SimAirLoops);
             SimZoneEquipment = true; // needs to be simulated at least twice for flow resolution to propagate to this routine
             ManageNonZoneEquipment(FirstHVACIteration, SimNonZoneEquipment);
             facilityElectricServiceObj->manageElectricPowerService(FirstHVACIteration, SimElecCircuitsFlag, false);
@@ -1834,7 +1831,7 @@ namespace HVACManager {
                     ManageAirflowNetworkBalance(FirstHVACIteration, IterAir, ResimulateAirZone);
                 }
                 if (SimAirLoops) {
-                    ManageAirLoops(FirstHVACIteration, SimAirLoops, SimZoneEquipment);
+                    ManageAirLoops(outputFiles, FirstHVACIteration, SimAirLoops, SimZoneEquipment);
                     SimElecCircuits = true; // If this was simulated there are possible electric changes that need to be simulated
                 }
 
@@ -1850,7 +1847,7 @@ namespace HVACManager {
                         ResolveAirLoopFlowLimits();
                         FlowResolutionNeeded = false;
                     }
-                    ManageZoneEquipment(FirstHVACIteration, SimZoneEquipment, SimAirLoops);
+                    ManageZoneEquipment(outputFiles, FirstHVACIteration, SimZoneEquipment, SimAirLoops);
                     SimElecCircuits = true; // If this was simulated there are possible electric changes that need to be simulated
                 }
                 FlowMaxAvailAlreadyReset = false;

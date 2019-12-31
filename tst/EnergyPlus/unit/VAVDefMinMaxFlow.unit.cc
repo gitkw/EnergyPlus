@@ -245,7 +245,7 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing1)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -425,7 +425,7 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing2)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -604,7 +604,7 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing3)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -785,7 +785,7 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing4)
     // GetOARequirements(); // get the OA requirements object
     // GetZoneAirDistribution(); // get zone air distribution objects
     // GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();
@@ -935,7 +935,7 @@ TEST_F(EnergyPlusFixture, VAVDefMinMaxFlowTestSizing5)
     GetOARequirements();      // get the OA requirements object
     GetZoneAirDistribution(); // get zone air distribution objects
     GetZoneSizingInput();
-    GetZoneEquipmentData1();
+    GetZoneEquipmentData1(outputFiles);
     ProcessScheduleInput();
     ScheduleInputProcessed = true;
     GetZoneAirLoopEquipment();

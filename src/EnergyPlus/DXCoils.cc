@@ -97,6 +97,8 @@
 #include <EnergyPlus/UtilityRoutines.hh>
 #include <EnergyPlus/WaterManager.hh>
 
+#include "OutputFiles.hh"
+
 namespace EnergyPlus {
 
 namespace DXCoils {
@@ -270,7 +272,8 @@ namespace DXCoils {
     } // namespace
     // Functions
 
-    void SimDXCoil(std::string const &CompName,   // name of the fan coil unit
+    void SimDXCoil(OutputFiles &outputFiles,
+                   std::string const &CompName,   // name of the fan coil unit
                    int const CompOp,              // compressor operation; 1=on, 0=off
                    bool const FirstHVACIteration, // True when first HVAC iteration
                    int &CompIndex,
@@ -341,7 +344,7 @@ namespace DXCoils {
         CurDXCoilNum = DXCoilNum;
 
         // Initialize the DX coil unit
-        InitDXCoil(DXCoilNum);
+        InitDXCoil(outputFiles, DXCoilNum);
 
         // Select the correct unit type
         {
@@ -397,7 +400,8 @@ namespace DXCoils {
         ReportDXCoil(DXCoilNum);
     }
 
-    void SimDXCoilMultiSpeed(std::string const &CompName, // name of the fan coil unit
+    void SimDXCoilMultiSpeed(OutputFiles &outputFiles,
+                             std::string const &CompName, // name of the fan coil unit
                              Real64 const SpeedRatio,     // = (CompressorSpeed - CompressorSpeedMin) /
                              Real64 const CycRatio,       // cycling part load ratio for variable speed
                              int &CompIndex,
@@ -469,7 +473,7 @@ namespace DXCoils {
         CurDXCoilNum = DXCoilNum;
 
         // Initialize the DX coil unit
-        InitDXCoil(DXCoilNum);
+        InitDXCoil(outputFiles, DXCoilNum);
 
         // Select the correct unit type
         {
@@ -512,7 +516,8 @@ namespace DXCoils {
         ReportDXCoil(DXCoilNum);
     }
 
-    void SimDXCoilMultiMode(std::string const &CompName,   // name of the fan coil unit
+    void SimDXCoilMultiMode(OutputFiles &outputFiles,
+                            std::string const &CompName,   // name of the fan coil unit
                             int const EP_UNUSED(CompOp),   // compressor operation; 1=on, 0=off !unused1208
                             bool const FirstHVACIteration, // true if first hvac iteration
                             Real64 const PartLoadRatio,    // part load ratio
@@ -611,7 +616,7 @@ namespace DXCoils {
         CurDXCoilNum = DXCoilNum;
 
         // Initialize the DX coil unit
-        InitDXCoil(DXCoilNum);
+        InitDXCoil(outputFiles, DXCoilNum);
 
         // Select the correct unit type
         {
@@ -6049,7 +6054,7 @@ namespace DXCoils {
         ManageEMS(emsCallFromComponentGetInput, anyEMSRan);
     }
 
-    void InitDXCoil(int const DXCoilNum) // number of the current DX coil unit being simulated
+    void InitDXCoil(OutputFiles &outputFiles, int const DXCoilNum) // number of the current DX coil unit being simulated
     {
 
         // SUBROUTINE INFORMATION:
@@ -6507,8 +6512,7 @@ namespace DXCoils {
 
                 // call for standard ratings for two-speeed DX coil
                 if (DXCoil(DXCoilNum).CondenserType(1) == AirCooled) {
-                    assert(ObjexxFCL::gio::out_stream(OutputFileInits));
-                    CalcTwoSpeedDXCoilStandardRating(DXCoilNum, *ObjexxFCL::gio::out_stream(OutputFileInits));
+                    CalcTwoSpeedDXCoilStandardRating(outputFiles, DXCoilNum);
                 }
             }
 
@@ -13429,7 +13433,7 @@ namespace DXCoils {
         }
     }
 
-    void CalcTwoSpeedDXCoilStandardRating(int const DXCoilNum, std::ostream &OutputFile)
+    void CalcTwoSpeedDXCoilStandardRating(OutputFiles &outputFiles, int const DXCoilNum)
     {
         // SUBROUTINE INFORMATION:
         //       AUTHOR         B. Griffith, (Derived from CalcDXCoilStandardRating by Bereket Nigusse & Chandan Sharma)
@@ -13814,8 +13818,7 @@ namespace DXCoils {
 
         // begin output
         if (OneTimeEIOHeaderWrite) {
-            OutputFile << Header;
-            ObjexxFCL::gio::write(OutputFileInits, Header);
+            outputFiles.eio << Header;
             OneTimeEIOHeaderWrite = false;
             pdstVAVDXCoolCoil = newPreDefSubTable(pdrEquip, "VAV DX Cooling Standard Rating Details");
             pdchVAVDXCoolCoilType = newPreDefColumn(pdstVAVDXCoolCoil, "DX Cooling Coil Type");
@@ -13865,7 +13868,7 @@ namespace DXCoils {
           }
         }();
 
-        fmt::print(OutputFile, Format_891
+        fmt::print(outputFiles.eio, Format_891
             , "Coil:Cooling:DX:TwoSpeed" , DXCoil(DXCoilNum).Name , fan_type_name.first, fan_type_name.second
             , NetCoolingCapRated , (NetCoolingCapRated * ConvFromSIToIP) , IEER
             , EER_TestPoint_SI(1) , EER_TestPoint_SI(2) , EER_TestPoint_SI(3)

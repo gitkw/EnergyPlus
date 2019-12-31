@@ -261,7 +261,8 @@ TEST_F(EnergyPlusFixture, HVACControllers_TestTempAndHumidityRatioCtrlVarType)
     DataPlant::PlantLoop(1).LoopSide(1).Branch(1).Comp(1).NodeNumOut = 3;
     DataPlant::PlantLoop(1).LoopSide(1).Branch(1).Comp(1).Name = "CHILLED WATER COIL";
     bool SimZoneEquipment(false);
-    SimAirServingZones::SimAirLoops(true, SimZoneEquipment);
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimAirServingZones::SimAirLoops(outputFiles, true, SimZoneEquipment);
 
     // after controllers are simulated, AirLoopControllerIndex = index to this controller on this air loop (e.g., n of num contollers on air loop)
     ASSERT_EQ(1, DataAirSystems::PrimaryAirSystem(1).NumControllers);

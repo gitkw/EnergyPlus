@@ -201,7 +201,8 @@ TEST_F(EnergyPlusFixture, WindowFrameTest)
     DataGlobals::BeginEnvrnFlag = true;
     DataEnvironment::OutBaroPress = 100000;
 
-    HeatBalanceManager::ManageHeatBalance();
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    HeatBalanceManager::ManageHeatBalance(outputFiles);
 
     // This test will emulate NFRC 100 U-factor test
     int winNum;

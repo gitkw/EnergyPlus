@@ -2971,7 +2971,7 @@ namespace VentilatedSlab {
                         if (SELECT_CASE_var == Heating_WaterCoilType) {
                             // control water flow to obtain output matching QZnReq
 
-                            ControlCompOutput(VentSlab(Item).Name,
+                            ControlCompOutput(outputFiles, VentSlab(Item).Name,
                                               cMO_VentilatedSlab,
                                               Item,
                                               FirstHVACIteration,
@@ -2989,7 +2989,7 @@ namespace VentilatedSlab {
                                               _,
                                               VentSlab(Item).HWLoopNum,
                                               VentSlab(Item).HWLoopSide,
-                                              VentSlab(Item).HWBranchNum);
+                                              VentSlab(Item).HWBranchNum, ObjexxFCL::Optional_int_const());
 
                         } else if ((SELECT_CASE_var == Heating_GasCoilType) || (SELECT_CASE_var == Heating_ElectricCoilType) ||
                                    (SELECT_CASE_var == Heating_SteamCoilType)) {
@@ -3217,7 +3217,7 @@ namespace VentilatedSlab {
                     CpFan = PsyCpAirFnWTdb(Node(FanOutletNode).HumRat, Node(FanOutletNode).Temp);
                     QZnReq = (Node(OutletNode).MassFlowRate) * CpFan * (RadInTemp - Node(FanOutletNode).Temp);
 
-                    ControlCompOutput(VentSlab(Item).Name,
+                    ControlCompOutput(outputFiles, VentSlab(Item).Name,
                                       cMO_VentilatedSlab,
                                       Item,
                                       FirstHVACIteration,
@@ -3235,7 +3235,7 @@ namespace VentilatedSlab {
                                       _,
                                       VentSlab(Item).CWLoopNum,
                                       VentSlab(Item).CWLoopSide,
-                                      VentSlab(Item).CWBranchNum);
+                                      VentSlab(Item).CWBranchNum, ObjexxFCL::Optional_int_const());
                 }
 
             } // ...end of HEATING/COOLING IF-THEN block
@@ -3341,7 +3341,10 @@ namespace VentilatedSlab {
         }
         if ((VentSlab(Item).CCoilPresent) && (VentSlab(Item).CCoilSchedValue >= 0.0)) {
             if (VentSlab(Item).CCoilType == Cooling_CoilHXAssisted) {
-                SimHXAssistedCoolingCoil(VentSlab(Item).CCoilName, FirstHVACIteration, On, 0.0, VentSlab(Item).CCoil_Index, ContFanCycCoil);
+                SimHXAssistedCoolingCoil(outputFiles, VentSlab(Item).CCoilName, FirstHVACIteration, On, 0.0,
+                                         VentSlab(Item).CCoil_Index, ContFanCycCoil, ObjexxFCL::Optional_bool_const(),
+                                         Optional<const Real64>(), ObjexxFCL::Optional_bool_const(),
+                                         Optional<Real64>());
             } else {
                 SimulateWaterCoilComponents(VentSlab(Item).CCoilName, FirstHVACIteration, VentSlab(Item).CCoil_Index);
             }

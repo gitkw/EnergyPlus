@@ -1775,7 +1775,8 @@ TEST_F(EnergyPlusFixture, ChillerAbsorption_Calc)
 
     ASSERT_TRUE(process_idf(idf_objects));
 
-    SimulationManager::ManageSimulation(); // run the design day
+    OutputFiles outputFiles{OutputFiles::makeOutputFiles()};
+    SimulationManager::ManageSimulation(outputFiles); // run the design day
 
     // set conditions for test
     int AbsChillNum = 1;

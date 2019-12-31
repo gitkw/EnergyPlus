@@ -3452,7 +3452,7 @@ namespace SingleDuct {
                     // Simulate the reheat coil at constant air flow. Control by varying the
                     // hot water flow rate.
                     // FB use QActualHeating, change ControlCompOutput to use new
-                    ControlCompOutput(Sys(SysNum).ReheatName,
+                    ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                       Sys(SysNum).ReheatComp,
                                       Sys(SysNum).ReheatComp_Index,
                                       FirstHVACIteration,
@@ -3470,7 +3470,7 @@ namespace SingleDuct {
                                       _,
                                       Sys(SysNum).HWLoopNum,
                                       Sys(SysNum).HWLoopSide,
-                                      Sys(SysNum).HWBranchIndex);
+                                      Sys(SysNum).HWBranchIndex, ObjexxFCL::Optional_int_const());
 
                     // If reverse action damper and the hot water flow is at maximum, simulate the
                     // hot water coil with fixed (maximum) hot water flow but allow the air flow to
@@ -3489,7 +3489,7 @@ namespace SingleDuct {
 
                             Node(Sys(SysNum).OutletNodeNum).MassFlowRateMaxAvail =
                                 MaxAirMassFlowRevAct; // suspect, check how/if used in ControlCompOutput
-                            ControlCompOutput(Sys(SysNum).ReheatName,
+                            ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                               Sys(SysNum).ReheatComp,
                                               Sys(SysNum).ReheatComp_Index,
                                               FirstHVACIteration,
@@ -3501,7 +3501,10 @@ namespace SingleDuct {
                                               Sys(SysNum).ControlCompTypeNum,
                                               Sys(SysNum).CompErrIndex,
                                               ZoneNodeNum,
-                                              SysOutletNode); // why not QZnReq  ?
+                                              SysOutletNode, Optional<const Real64>(), ObjexxFCL::Optional_int_const(),
+                                              ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const(),
+                                              ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const(),
+                                              ObjexxFCL::Optional_int_const()); // why not QZnReq  ?
                             // air flow controller, not on plant, don't pass plant topology info
                             // reset terminal unit inlet air mass flow to new value.
                             Node(Sys(SysNum).OutletNodeNum).MassFlowRateMaxAvail = SysInlet(SysNum).AirMassFlowRateMaxAvail;
@@ -3519,7 +3522,7 @@ namespace SingleDuct {
                                 // Although this equation looks strange (using temp instead of deltaT), it is corrected later in ControlCompOutput
                                 // and is working as-is, temperature setpoints are maintained as expected.
                                 QZnReq = QZoneMax2 + MassFlow * CpAirAvg * ZoneTemp;
-                                ControlCompOutput(Sys(SysNum).ReheatName,
+                                ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                                   Sys(SysNum).ReheatComp,
                                                   Sys(SysNum).ReheatComp_Index,
                                                   FirstHVACIteration,
@@ -3537,7 +3540,7 @@ namespace SingleDuct {
                                                   _,
                                                   Sys(SysNum).HWLoopNum,
                                                   Sys(SysNum).HWLoopSide,
-                                                  Sys(SysNum).HWBranchIndex);
+                                                  Sys(SysNum).HWBranchIndex, ObjexxFCL::Optional_int_const());
                             }
 
                             SysOutlet(SysNum).AirMassFlowRate = MassFlow;
@@ -3921,7 +3924,7 @@ namespace SingleDuct {
 
                     // Simulate the reheat coil at constant air flow. Control by varying the
                     // hot water flow rate.
-                    ControlCompOutput(Sys(SysNum).ReheatName,
+                    ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                       Sys(SysNum).ReheatComp,
                                       Sys(SysNum).ReheatComp_Index,
                                       FirstHVACIteration,
@@ -3939,14 +3942,14 @@ namespace SingleDuct {
                                       _,
                                       Sys(SysNum).HWLoopNum,
                                       Sys(SysNum).HWLoopSide,
-                                      Sys(SysNum).HWBranchIndex);
+                                      Sys(SysNum).HWBranchIndex, ObjexxFCL::Optional_int_const());
 
                     // If reverse action damper and the hot water flow is at maximum, simulate the
                     // hot water coil with fixed (maximum) hot water flow but allow the air flow to
                     // vary up to the maximum (air damper opens to try to meet zone load).
                     if (Sys(SysNum).DamperHeatingAction == ReverseAction) {
                         if (Node(Sys(SysNum).ReheatControlNode).MassFlowRate == Sys(SysNum).MaxReheatWaterFlow) {
-                            ControlCompOutput(Sys(SysNum).ReheatName,
+                            ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                               Sys(SysNum).ReheatComp,
                                               Sys(SysNum).ReheatComp_Index,
                                               FirstHVACIteration,
@@ -3958,7 +3961,10 @@ namespace SingleDuct {
                                               Sys(SysNum).ControlCompTypeNum,
                                               Sys(SysNum).CompErrIndex,
                                               ZoneNodeNum,
-                                              SysOutletNode);
+                                              SysOutletNode, Optional<const Real64>(), ObjexxFCL::Optional_int_const(),
+                                              ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const(),
+                                              ObjexxFCL::Optional_int_const(), ObjexxFCL::Optional_int_const(),
+                                              ObjexxFCL::Optional_int_const());
                             //                                   ! air flow controller, not on plant, don't pass plant topology info
 
                             // reset terminal unit inlet air mass flow to new value.
@@ -3974,7 +3980,7 @@ namespace SingleDuct {
                             MassFlow = MassFlow1(SysNum);
                             SysOutlet(SysNum).AirMassFlowRate = MassFlow;
                             UpdateSys(SysNum);
-                            ControlCompOutput(Sys(SysNum).ReheatName,
+                            ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                               Sys(SysNum).ReheatComp,
                                               Sys(SysNum).ReheatComp_Index,
                                               FirstHVACIteration,
@@ -3992,7 +3998,7 @@ namespace SingleDuct {
                                               _,
                                               Sys(SysNum).HWLoopNum,
                                               Sys(SysNum).HWLoopSide,
-                                              Sys(SysNum).HWBranchIndex);
+                                              Sys(SysNum).HWBranchIndex, ObjexxFCL::Optional_int_const());
                         }
                         // recalculate damper position
                         if (Sys(SysNum).AirMassFlowRateMax == 0.0) {
@@ -4610,7 +4616,7 @@ namespace SingleDuct {
 
                     // Simulate reheat coil for the Const Volume system
                     // Set Converged to True & when controller is not converged it will set to False.
-                    ControlCompOutput(Sys(SysNum).ReheatName,
+                    ControlCompOutput(outputFiles, Sys(SysNum).ReheatName,
                                       Sys(SysNum).ReheatComp,
                                       Sys(SysNum).ReheatComp_Index,
                                       FirstHVACIteration,
@@ -4628,7 +4634,7 @@ namespace SingleDuct {
                                       _,
                                       Sys(SysNum).HWLoopNum,
                                       Sys(SysNum).HWLoopSide,
-                                      Sys(SysNum).HWBranchIndex);
+                                      Sys(SysNum).HWBranchIndex, ObjexxFCL::Optional_int_const());
 
                 } else if (SELECT_CASE_var == HCoilType_SteamAirHeating) { // COIL:STEAM:STEAMAIRHEATING
                     // Determine the load required to pass to the Component controller

@@ -210,7 +210,7 @@ TEST_F(EnergyPlusFixture, TranspiredCollectors_InitTranspiredCollectorTest)
     EXPECT_FALSE(ErrorsFound);
 
     GetZoneData(ErrorsFound);
-    GetZoneEquipmentData();
+    GetZoneEquipmentData(outputFiles);
 
     GetMaterialData(ErrorsFound); // read material data
     EXPECT_FALSE(ErrorsFound);    // expect no errors

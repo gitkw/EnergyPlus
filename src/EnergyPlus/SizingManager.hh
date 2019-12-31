@@ -56,6 +56,7 @@
 #include <EnergyPlus/EnergyPlus.hh>
 
 namespace EnergyPlus {
+    class OutputFiles;
 
 namespace SizingManager {
 
@@ -91,9 +92,9 @@ namespace SizingManager {
     // Functions
     void clear_state();
 
-    void ManageSizing();
+    void ManageSizing(OutputFiles &outputFiles);
 
-    void ManageSystemSizingAdjustments();
+    void ManageSystemSizingAdjustments(OutputFiles &outputFiles);
 
     void ManageSystemVentilationAdjustments();
 
@@ -131,7 +132,7 @@ namespace SizingManager {
 
     void GetPlantSizingInput();
 
-    void SetupZoneSizing(bool &ErrorsFound);
+    void SetupZoneSizing(OutputFiles &outputFiles, bool &ErrorsFound);
 
     void ReportZoneSizing(std::string const &ZoneName,   // the name of the zone
                           std::string const &LoadType,   // the description of the input variable
