@@ -14195,16 +14195,20 @@ namespace OutputReportTabular {
                     rowHead(6) = "Number of People";
                 }
 
-                tableBody(1, 1) = RealToStr(curCompLoad.outsideAirRatio, 4);   // outside Air
-                tableBody(1, 2) = RealToStr(curCompLoad.airflowPerFlrArea, 4); // airflow per floor area
-                tableBody(1, 3) = RealToStr(curCompLoad.airflowPerTotCap, 4);  // airflow per total capacity
-                tableBody(1, 4) = RealToStr(curCompLoad.areaPerTotCap, 4);     // area per total capacity
-                tableBody(1, 5) = RealToStr(curCompLoad.totCapPerArea, 4);     // total capacity per area
-                                                                               //				if ( kind == facilityOutput ) {
-                //					tableBody( 1, 6 ) = RealToStr( curCompLoad.chlPumpPerFlow, 4 );  // chiller pump power per
-                // flow 					tableBody( 1, 7 ) = RealToStr( curCompLoad.cndPumpPerFlow, 4 );  // condenser pump
-                // power per  flow
-                //				}
+                if (unitsStyle != unitsStyleInchPound) {
+                    tableBody(1, 1) = RealToStr(curCompLoad.outsideAirRatio, 4);   // outside Air
+                    tableBody(1, 2) = RealToStr(curCompLoad.airflowPerFlrArea, 4); // airflow per floor area
+                    tableBody(1, 3) = RealToStr(curCompLoad.airflowPerTotCap, 4);  // airflow per total capacity
+                    tableBody(1, 4) = RealToStr(curCompLoad.areaPerTotCap, 4);     // area per total capacity
+                    tableBody(1, 5) = RealToStr(curCompLoad.totCapPerArea, 4);     // total capacity per area
+                } else {
+                    tableBody(1, 1) = RealToStr(curCompLoad.outsideAirRatio, 6);   // outside Air
+                    tableBody(1, 2) = RealToStr(curCompLoad.airflowPerFlrArea, 6); // airflow per floor area
+                    tableBody(1, 3) = RealToStr(curCompLoad.airflowPerTotCap, 6);  // airflow per total capacity
+                    tableBody(1, 4) = RealToStr(curCompLoad.areaPerTotCap, 6);     // area per total capacity
+                    tableBody(1, 5) = RealToStr(curCompLoad.totCapPerArea, 6);     // total capacity per area
+                }
+
                 tableBody(1, 6) = RealToStr(curCompLoad.numPeople, 1); // number of people
 
                 WriteSubtitle(engineeringCheckName);
